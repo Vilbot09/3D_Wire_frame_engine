@@ -44,9 +44,9 @@ void Engine::multiplyMatrix4x4(Mat4x4 &matrix, Vec3D &in, Vec3D &out) {
     out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z;
     out.w;
 
-    for (int i = 0; i < sizeof(matrix.mat)/sizeof(matrix.mat[0]); i++) {
-        for (int r = 0; r < sizeof(matrix.mat[0])/sizeof(matrix.mat[0][0]); i++) {
-            std::cout << i+r;
-        }
-      }
+    //for (int i = 0; i < sizeof(matrix.mat)/sizeof(matrix.mat[0]); i++) {
+      //  for (int r = 0; r < sizeof(matrix.mat[0])/sizeof(matrix.mat[0][0]); i++) {
+          //  std::cout << i+r;
+        //}
+      //}
 }
