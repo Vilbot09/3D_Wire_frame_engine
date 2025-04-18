@@ -4,7 +4,7 @@
 #include <vector>
 
 struct Vec3D {
-    float x, y, z, w;
+    float x, y, z;
 };
 
 struct Tri3D {
@@ -24,6 +24,10 @@ public:
     Mesh3D testCube;
     Mat4x4 simpleProjection;
 
+    int WIDTH = 1000;
+    int HEIGHT = 700;
+
+    float aspectRatio = HEIGHT / WIDTH;
     float FOV = 70;
     float FOVRad = FOV/180 * 3.141592;
     float nearClipPlane = 0.1f;
@@ -32,8 +36,8 @@ public:
     
     Engine();
     
-    void multiplyMatrix4x4(Mat4x4 &matrix, Vec3D &in, Vec3D &out);
-    void drawTriangle3D(Tri3D tri);
+    void multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out);
+    void drawTriangle3D(Mat4x4 matrix, Tri3D tri);
     void drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
     void drawMeshes();
 };
