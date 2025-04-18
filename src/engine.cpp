@@ -7,31 +7,7 @@ Engine::Engine() {
     InitWindow(WIDTH, HEIGHT, "3D Engine");
     SetTargetFPS(60);
 
-    testCube.tris = {
-        // SOUTH
-        { 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
-        { 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
-
-        // EAST                                                      
-        { 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f },
-        { 1.0f, 0.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 0.0f, 1.0f },
-
-        // NORTH                                                     
-        { 1.0f, 0.0f, 1.0f,    1.0f, 1.0f, 1.0f,    0.0f, 1.0f, 1.0f },
-        { 1.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 0.0f, 1.0f },
-
-        // WEST                                                      
-        { 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 1.0f,    0.0f, 1.0f, 0.0f },
-        { 0.0f, 0.0f, 1.0f,    0.0f, 1.0f, 0.0f,    0.0f, 0.0f, 0.0f },
-
-        // TOP                                                       
-        { 0.0f, 1.0f, 0.0f,    0.0f, 1.0f, 1.0f,    1.0f, 1.0f, 1.0f },
-        { 0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 1.0f,    1.0f, 1.0f, 0.0f },
-
-        // BOTTOM                                                    
-        { 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f },
-        { 1.0f, 0.0f, 1.0f,    0.0f, 0.0f, 0.0f,    1.0f, 0.0f, 0.0f },
-    };
+    testCube.tris = MeshPreset::cube;
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
@@ -56,18 +32,18 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     multiplyMatrix4x4(matrix, tri.vecs[2], out.vecs[2]);
 
     // Scale into view
-    tri.vecs[0].x *= 100; tri.vecs[0].y *= 100;
-    tri.vecs[1].x *= 100; tri.vecs[1].y *= 100;
-    tri.vecs[2].x *= 100; tri.vecs[2].y *= 100;
+    out.vecs[0].x *= HEIGHT/2; out.vecs[0].y *= HEIGHT/2;
+    out.vecs[1].x *= HEIGHT/2; out.vecs[1].y *= HEIGHT/2;
+    out.vecs[2].x *= HEIGHT/2; out.vecs[2].y *= HEIGHT/2;
 
-    tri.vecs[0].x += WIDTH/2; tri.vecs[0].y += HEIGHT/2;
-    tri.vecs[1].x += WIDTH/2; tri.vecs[1].y += HEIGHT/2;
-    tri.vecs[2].x += WIDTH/2; tri.vecs[2].y += HEIGHT/2;
+    out.vecs[0].x += WIDTH/2; out.vecs[0].y += HEIGHT/2;
+    out.vecs[1].x += WIDTH/2; out.vecs[1].y += HEIGHT/2;
+    out.vecs[2].x += WIDTH/2; out.vecs[2].y += HEIGHT/2;
 
     drawTriangle2D(
-        tri.vecs[0].x, tri.vecs[0].y,
-        tri.vecs[1].x, tri.vecs[1].y,
-        tri.vecs[2].x, tri.vecs[2].y
+        out.vecs[0].x, out.vecs[0].y,
+        out.vecs[1].x, out.vecs[1].y,
+        out.vecs[2].x, out.vecs[2].y
     );
 }
 
@@ -82,10 +58,14 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
 }
 
 void Engine::drawMeshes() {
-    std::cout << testCube.tris[0].vecs[2].y;
-
-    drawTriangle3D(simpleProjection, testCube.tris[0]);
+    drawMesh(simpleProjection, testCube);
 };
+
+void Engine::drawMesh(Mat4x4 matrix, Mesh3D mesh) {
+    for (auto tri : mesh.tris) {
+        drawTriangle3D(matrix, tri);
+    }
+}
 
 void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
     out.x = matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z;

@@ -39,5 +39,6 @@ public:
     void multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out);
     void drawTriangle3D(Mat4x4 matrix, Tri3D tri);
     void drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
+    void drawMesh(Mat4x4, Mesh3D);
     void drawMeshes();
 };
