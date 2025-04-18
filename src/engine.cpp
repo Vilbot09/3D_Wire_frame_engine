@@ -4,8 +4,10 @@
 #include <iostream>
 
 Engine::Engine() {
-    InitWindow(WIDTH, HEIGHT, "3D Engine");
+    SetConfigFlags(FLAG_WINDOW_RESIZABLE);
+    InitWindow(1000, 700, "3D Engine");
     SetTargetFPS(60);
+    MaximizeWindow();
 
     testCube.tris = MeshPreset::cube;
 
@@ -15,6 +17,10 @@ Engine::Engine() {
 
     while (!WindowShouldClose())
     {
+        width = GetScreenWidth();
+        height = GetScreenHeight();
+        aspectRatio = height/width;
+
         BeginDrawing();
             ClearBackground(RAYWHITE);
             drawMeshes();
@@ -32,13 +38,13 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     multiplyMatrix4x4(matrix, tri.vecs[2], out.vecs[2]);
 
     // Scale into view
-    out.vecs[0].x *= HEIGHT/2; out.vecs[0].y *= HEIGHT/2;
-    out.vecs[1].x *= HEIGHT/2; out.vecs[1].y *= HEIGHT/2;
-    out.vecs[2].x *= HEIGHT/2; out.vecs[2].y *= HEIGHT/2;
+    out.vecs[0].x *= height/2; out.vecs[0].y *= height/2;
+    out.vecs[1].x *= height/2; out.vecs[1].y *= height/2;
+    out.vecs[2].x *= height/2; out.vecs[2].y *= height/2;
 
-    out.vecs[0].x += WIDTH/2; out.vecs[0].y += HEIGHT/2;
-    out.vecs[1].x += WIDTH/2; out.vecs[1].y += HEIGHT/2;
-    out.vecs[2].x += WIDTH/2; out.vecs[2].y += HEIGHT/2;
+    out.vecs[0].x += width/2; out.vecs[0].y += height/2;
+    out.vecs[1].x += width/2; out.vecs[1].y += height/2;
+    out.vecs[2].x += width/2; out.vecs[2].y += height/2;
 
     drawTriangle2D(
         out.vecs[0].x, out.vecs[0].y,
@@ -48,13 +54,13 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
 }
 
 void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
-    DrawCircle(x1, y1, 4, BLUE);
-    DrawCircle(x2, y2, 4, BLUE);
-    DrawCircle(x3, y3, 4, BLUE);
-
     DrawLine(x1, y1, x2, y2, BLACK);
     DrawLine(x2, y2, x3, y3, BLACK);
     DrawLine(x3, y3, x1, y1, BLACK);
+
+    DrawCircle(x1, y1, 4, BLUE);
+    DrawCircle(x2, y2, 4, BLUE);
+    DrawCircle(x3, y3, 4, BLUE);
 }
 
 void Engine::drawMeshes() {

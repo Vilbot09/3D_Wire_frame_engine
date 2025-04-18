@@ -24,16 +24,15 @@ public:
     Mesh3D testCube;
     Mat4x4 simpleProjection;
 
-    int WIDTH = 1000;
-    int HEIGHT = 700;
+    int width = 1000;
+    int height = 700;
 
-    float aspectRatio = HEIGHT / WIDTH;
+    float aspectRatio = height/width;
     float FOV = 70;
     float FOVRad = FOV/180 * 3.141592;
     float nearClipPlane = 0.1f;
     float farClipPlane = 100.0f;
 
-    
     Engine();
     
     void multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out);
