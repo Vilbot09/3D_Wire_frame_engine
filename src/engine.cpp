@@ -2,6 +2,7 @@
 #include "raylib/raylib.h"
 #include "headers/presets.h"
 #include <iostream>
+#include <cmath>
 
 Engine::Engine() {
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
@@ -9,17 +10,38 @@ Engine::Engine() {
     SetTargetFPS(60);
     MaximizeWindow();
 
-    testCube.tris = MeshPreset::cube;
+    testCube.LoadFromObjectFile("../meshes/ship.obj");
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
     simpleProjection.mat[3][3] = 1;
+
+    float xRotAngle;
+    float yRotAngle;
 
     while (!WindowShouldClose())
     {
         width = GetScreenWidth();
         height = GetScreenHeight();
         aspectRatio = height/width;
+
+        xRotAngle += 0.01f;
+        yRotAngle += 0.01f;
+
+        // Setup Rotation Matricies
+        xRotMat.mat[0][0] = 1;
+        xRotMat.mat[1][1] = std::cos(xRotAngle);
+        xRotMat.mat[2][2] = std::cos(xRotAngle);
+        xRotMat.mat[2][1] = std::sin(xRotAngle);
+        xRotMat.mat[1][2] = -std::sin(xRotAngle);
+        
+        yRotMat.mat[0][0] = std::cos(yRotAngle);
+        yRotMat.mat[1][1] = 1;
+        yRotMat.mat[2][2] = std::cos(yRotAngle);
+        yRotMat.mat[0][2] = std::sin(yRotAngle);
+        yRotMat.mat[2][0] = -std::sin(yRotAngle);
+
+        // zRot HERE!
 
         BeginDrawing();
             ClearBackground(RAYWHITE);
@@ -31,25 +53,34 @@ Engine::Engine() {
 }
 
 void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
-    Tri3D out;
+    Tri3D projected, xRotated, yRotated, zRotated;
 
-    multiplyMatrix4x4(matrix, tri.vecs[0], out.vecs[0]);
-    multiplyMatrix4x4(matrix, tri.vecs[1], out.vecs[1]);
-    multiplyMatrix4x4(matrix, tri.vecs[2], out.vecs[2]);
+    multiplyMatrix4x4(xRotMat, tri.vecs[0], xRotated.vecs[0]);
+    multiplyMatrix4x4(xRotMat, tri.vecs[1], xRotated.vecs[1]);
+    multiplyMatrix4x4(xRotMat, tri.vecs[2], xRotated.vecs[2]);
+
+    multiplyMatrix4x4(yRotMat, xRotated.vecs[0], yRotated.vecs[0]);
+    multiplyMatrix4x4(yRotMat, xRotated.vecs[1], yRotated.vecs[1]);
+    multiplyMatrix4x4(yRotMat, xRotated.vecs[2], yRotated.vecs[2]);
+
+    multiplyMatrix4x4(matrix, yRotated.vecs[0], projected.vecs[0]);
+    multiplyMatrix4x4(matrix, yRotated.vecs[1], projected.vecs[1]);
+    multiplyMatrix4x4(matrix, yRotated.vecs[2], projected.vecs[2]);
+
 
     // Scale into view
-    out.vecs[0].x *= height/2; out.vecs[0].y *= height/2;
-    out.vecs[1].x *= height/2; out.vecs[1].y *= height/2;
-    out.vecs[2].x *= height/2; out.vecs[2].y *= height/2;
+    projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
+    projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
+    projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
 
-    out.vecs[0].x += width/2; out.vecs[0].y += height/2;
-    out.vecs[1].x += width/2; out.vecs[1].y += height/2;
-    out.vecs[2].x += width/2; out.vecs[2].y += height/2;
+    projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
+    projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
+    projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
 
     drawTriangle2D(
-        out.vecs[0].x, out.vecs[0].y,
-        out.vecs[1].x, out.vecs[1].y,
-        out.vecs[2].x, out.vecs[2].y
+        projected.vecs[0].x, projected.vecs[0].y,
+        projected.vecs[1].x, projected.vecs[1].y,
+        projected.vecs[2].x, projected.vecs[2].y
     );
 }
 
