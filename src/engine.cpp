@@ -5,10 +5,17 @@
 #include <cmath>
 
 Engine::Engine() {
+
+
     SetConfigFlags(FLAG_WINDOW_RESIZABLE);
     InitWindow(1000, 700, "3D Engine");
     SetTargetFPS(60);
     MaximizeWindow();
+
+    Image icon;
+    icon = LoadImage("../images/engine.png");
+    SetWindowIcon(icon);
+    UnloadImage(icon);
 
     testCube.LoadFromObjectFile("../meshes/ship.obj");
 
