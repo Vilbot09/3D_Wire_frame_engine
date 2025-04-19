@@ -95,32 +95,53 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     multiplyMatrix4x4(zRotMat, yRotated.vecs[1], zRotated.vecs[1]);
     multiplyMatrix4x4(zRotMat, yRotated.vecs[2], zRotated.vecs[2]);
 
-    // Projection
-    multiplyMatrix4x4(matrix, zRotated.vecs[0], projected.vecs[0]);
-    multiplyMatrix4x4(matrix, zRotated.vecs[1], projected.vecs[1]);
-    multiplyMatrix4x4(matrix, zRotated.vecs[2], projected.vecs[2]);
+    Vec3D towardPlayer;
+    towardPlayer.x = 0;
+    towardPlayer.y = 0;
+    towardPlayer.z = -1;
 
+    Vec3D normal;
+    calculateNormalVector(zRotated, normal); 
 
-    // Scale into view
-    projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
-    projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
-    projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
+    // Dot Product
+    float dot = normal.x*towardPlayer.x+normal.y*towardPlayer.y+normal.z*towardPlayer.z;
 
-    projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
-    projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
-    projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
+    dot = 1;
+    if (dot > 0) {
+        // Projection
+        multiplyMatrix4x4(matrix, zRotated.vecs[0], projected.vecs[0]);
+        multiplyMatrix4x4(matrix, zRotated.vecs[1], projected.vecs[1]);
+        multiplyMatrix4x4(matrix, zRotated.vecs[2], projected.vecs[2]);
 
-    drawTriangle2D(
-        projected.vecs[0].x, projected.vecs[0].y,
-        projected.vecs[1].x, projected.vecs[1].y,
-        projected.vecs[2].x, projected.vecs[2].y
-    );
+        // Scale into view
+        projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
+        projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
+        projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
+
+        projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
+        projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
+        projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
+
+        drawTriangle2D(
+            projected.vecs[0].x, projected.vecs[0].y,
+            projected.vecs[1].x, projected.vecs[1].y,
+            projected.vecs[2].x, projected.vecs[2].y
+        );
+    }
 }
 
 void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     DrawLine(x1, y1, x2, y2, BLACK);
     DrawLine(x2, y2, x3, y3, BLACK);
     DrawLine(x3, y3, x1, y1, BLACK);
+
+    /*
+    Vector2 v1 = {(float)x1, (float)y1};
+    Vector2 v2 = {(float)x2, (float)y2};
+    Vector2 v3 = {(float)x3, (float)y3};
+
+    DrawTriangle(v1, v2, v3, RAYWHITE); // Color should be bg-color
+    */
 
     DrawCircle(x1, y1, 4, BLUE);
     DrawCircle(x2, y2, 4, BLUE);
@@ -135,6 +156,24 @@ void Engine::drawMesh(Mat4x4 matrix, Mesh3D mesh) {
     for (auto tri : mesh.tris) {
         drawTriangle3D(matrix, tri);
     }
+}
+
+void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
+    Vec3D U, V;
+
+    // Subtract Vectors
+    U.x = tri.vecs[1].x - tri.vecs[0].x;
+    U.y = tri.vecs[1].y - tri.vecs[0].y;
+    U.z = tri.vecs[1].z - tri.vecs[0].z;
+
+    V.x = tri.vecs[2].x - tri.vecs[0].x;
+    V.y = tri.vecs[2].y - tri.vecs[0].y;
+    V.z = tri.vecs[2].z - tri.vecs[0].z;
+
+    // Cross Product
+    out.x = U.y * V.z - U.z * V.y;
+    out.y = U.z * V.x - U.x * V.y;
+    out.z = U.x * V.y - U.y * V.x;
 }
 
 void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
