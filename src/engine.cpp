@@ -16,7 +16,7 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    testCube.LoadFromObjectFile("../meshes/ship.obj");
+    testCube.LoadFromObjectFile("../meshes/test.obj");
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
