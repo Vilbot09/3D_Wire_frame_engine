@@ -1,16 +1,31 @@
-cmake_minimum_required(VERSION 4.0.0)
+cmake_minimum_required(VERSION 3.25.0)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-project(3D_Engine VERSION 1.0.0 LANGUAGES C CXX)
+project(engine VERSION 1.0.0 LANGUAGES C CXX)
 
 include_directories(
     ${CMAKE_SOURCE_DIR}/include
 )
-link_directories(${CMAKE_SOURCE_DIR}/libs)
 
 file(GLOB SOURCES "src/*.cpp")
 
-add_executable(3D_Engine ${SOURCES})
+if (WIN32) 
+    message(STATUS "Creating cmake files for windows!")
+    link_directories(${CMAKE_SOURCE_DIR}/libs/windows)
+    add_executable(engine ${SOURCES})
+    target_link_libraries(engine raylib gdi32 winmm -Wno-deprecated)
 
-target_link_libraries(3D_Engine raylib gdi32 winmm -Wno-deprecated)
+
+elseif (UNIX) 
+    message(STATUS "Creating cmake files for linux!")
+    link_directories(${CMAKE_SOURCE_DIR}/libs/linux)
+    add_executable(engine ${SOURCES})
+    target_link_libraries(engine raylib m dl pthread GL rt X11 -Wno-deprecated)
+
+
+else() 
+    message(FATAL_ERROR "Platform Not Supported")
+
+
+endif()
