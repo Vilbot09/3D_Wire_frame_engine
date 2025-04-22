@@ -5,6 +5,7 @@
 #include <string>
 #include <fstream>
 #include <strstream>
+#include <cmath>
 
 struct Vec3D {
     float x, y, z;
@@ -63,6 +64,7 @@ class Engine {
 public:
     Mesh3D testCube;
     Mat4x4 simpleProjection;
+    Mat4x4 perspective;
 
     // Rotation Matricies
     Mat4x4 xRotMat;
@@ -75,9 +77,11 @@ public:
 
     float aspectRatio = height/width;
     float FOV = 70;
-    float FOVRad = FOV/180 * 3.141592;
-    float nearClipPlane = 0.1f;
-    float farClipPlane = 100.0f;
+    float FOVRad = 1/std::tan(FOV/180 * 3.141592 * 0.5);
+    float nearClipPlane = 1.0f;
+    float farClipPlane = 10.0f;
+    float q = farClipPlane/(farClipPlane-nearClipPlane);
+
 
     Engine();
     

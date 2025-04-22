@@ -16,11 +16,18 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    testCube.LoadFromObjectFile("../meshes/test.obj");
+    testCube.LoadFromObjectFile("../meshes/ship.obj");
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
+    simpleProjection.mat[2][2] = 1;
     simpleProjection.mat[3][3] = 1;
+
+    perspective.mat[0][0] = aspectRatio*FOVRad;
+    perspective.mat[1][1] = FOVRad;
+    perspective.mat[2][2] = q;
+    perspective.mat[3][2] = -nearClipPlane*q;
+    perspective.mat[2][3] = 1;
 
     float xRotAngle;
     float yRotAngle;
@@ -149,7 +156,7 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
 }
 
 void Engine::drawMeshes() {
-    drawMesh(simpleProjection, testCube);
+    drawMesh(perspective, testCube);
 };
 
 void Engine::drawMesh(Mat4x4 matrix, Mesh3D mesh) {
@@ -177,14 +184,13 @@ void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
 }
 
 void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
-    out.x = matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z;
-    out.y = matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z;
+    float w = 0;
+    if(in.z != 1){w = in.z;} 
+    else {w = 1;}
+    out.x = (matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z + matrix.mat[3][0])/in.z;
+    out.y = (matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z + matrix.mat[3][1])/in.z;
     out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z + matrix.mat[3][2];
-    float w = matrix.mat[0][3] * in.x + matrix.mat[1][3] * in.y + matrix.mat[2][3] * in.z;
+    
 
-    //for (int i = 0; i < sizeof(matrix.mat)/sizeof(matrix.mat[0]); i++) {
-      //  for (int r = 0; r < sizeof(matrix.mat[0])/sizeof(matrix.mat[0][0]); i++) {
-          //  std::cout << i+r;
-        //}
-      //}
+
 }
