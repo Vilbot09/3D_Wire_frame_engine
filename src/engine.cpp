@@ -16,7 +16,7 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    testCube.LoadFromObjectFile("../meshes/ship.obj");
+    testCube.tris = MeshPreset::cube;
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
@@ -28,6 +28,8 @@ Engine::Engine() {
     perspective.mat[2][2] = q;
     perspective.mat[3][2] = -nearClipPlane*q;
     perspective.mat[2][3] = 1;
+    std::cout << perspective.mat[0][0] << std::endl;
+    std::cout.flush();
 
     float xRotAngle;
     float yRotAngle;
@@ -39,9 +41,9 @@ Engine::Engine() {
         height = GetScreenHeight();
         aspectRatio = height/width;
 
-        xRotAngle += 0.01f;
-        yRotAngle += 0.01f;
-        zRotAngle += 0.01f;
+        xRotAngle += 0.00f;
+        yRotAngle += 0.00f;
+        zRotAngle += 0.00f;
 
         if (IsKeyPressed(KEY_F11)) {
             if (!IsWindowFullscreen()) {
@@ -102,6 +104,11 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     multiplyMatrix4x4(zRotMat, yRotated.vecs[1], zRotated.vecs[1]);
     multiplyMatrix4x4(zRotMat, yRotated.vecs[2], zRotated.vecs[2]);
 
+    // Translate
+    zRotated.vecs[0].z += 20;
+    zRotated.vecs[1].z += 20;
+    zRotated.vecs[2].z += 20;
+
     Vec3D towardPlayer;
     towardPlayer.x = 0;
     towardPlayer.y = 0;
@@ -120,14 +127,25 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
         multiplyMatrix4x4(matrix, zRotated.vecs[1], projected.vecs[1]);
         multiplyMatrix4x4(matrix, zRotated.vecs[2], projected.vecs[2]);
 
-        // Scale into view
-        projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
-        projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
-        projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
+        // Scale into view for perspective
 
-        projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
-        projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
-        projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
+        projected.vecs[0].x += 1; projected.vecs[0].y += 1;
+        projected.vecs[1].x += 1; projected.vecs[1].y += 1;
+        projected.vecs[2].x += 1; projected.vecs[2].y += 1;
+
+        projected.vecs[0].x *= width/2; projected.vecs[0].y *= height/2;
+        projected.vecs[1].x *= width/2; projected.vecs[1].y *= height/2;
+        projected.vecs[2].x *= width/2; projected.vecs[2].y *= height/2;
+
+        //Scale into view for simple projection
+        projected.vecs[0].x += 1; projected.vecs[0].y += 1;
+        projected.vecs[1].x += 1; projected.vecs[1].y += 1;
+        projected.vecs[2].x += 1; projected.vecs[2].y += 1;
+
+        projected.vecs[0].x *= width/2; projected.vecs[0].y *= height/2;
+        projected.vecs[1].x *= width/2; projected.vecs[1].y *= height/2;
+        projected.vecs[2].x *= width/2; projected.vecs[2].y *= height/2;
+
 
         drawTriangle2D(
             projected.vecs[0].x, projected.vecs[0].y,
@@ -156,7 +174,7 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
 }
 
 void Engine::drawMeshes() {
-    drawMesh(perspective, testCube);
+    drawMesh(simpleProjection, testCube);
 };
 
 void Engine::drawMesh(Mat4x4 matrix, Mesh3D mesh) {
@@ -184,13 +202,16 @@ void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
 }
 
 void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
-    float w = 0;
-    if(in.z != 1){w = in.z;} 
-    else {w = 1;}
-    out.x = (matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z + matrix.mat[3][0])/in.z;
-    out.y = (matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z + matrix.mat[3][1])/in.z;
-    out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z + matrix.mat[3][2];
     
+    
+    out.x = (matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z + matrix.mat[3][0]);
+    out.y = (matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z + matrix.mat[3][1]);
+    out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z + matrix.mat[3][2];
+    float w = in.z;
 
+    /*if (w != 0.0f) {
+        out.x /= w;
+        out.y /= w;
+    }*/
 
 }
