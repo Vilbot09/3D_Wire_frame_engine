@@ -1,6 +1,7 @@
+#include "headers/sceneObject.h"
+#include "headers/mesh.h"
 #include "headers/engine.h"
 #include "raylib/raylib.h"
-#include "headers/presets.h"
 #include <iostream>
 #include <cmath>
 
@@ -16,42 +17,18 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    testCube.LoadFromObjectFile("../meshes/ship.obj");
+    //testCube.LoadFromObjectFile("../meshes/ship.obj");
     //testCube.tris = MeshPreset::cube;
+
+    //floor.LoadFromObjectFile("../meshes/plane.obj");
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
     simpleProjection.mat[2][2] = 1;
     simpleProjection.mat[3][3] = 1;
-
-    //Change into separate function
-    updateMatricies();
-    std::cout << perspective.mat[0][0] << std::endl;
-    std::cout.flush();
-
-    while (!WindowShouldClose())
-    {
-        width = GetScreenWidth();
-        height = GetScreenHeight();
-        aspectRatio = (float)height/(float)width;
-
-        xRotAngle += 0.01f;
-        yRotAngle += 0.00f;
-        zRotAngle += 0.00f;
-
-        updateMatricies();
-        inputHandler();
-
-        BeginDrawing();
-            ClearBackground(BLACK);
-            drawMeshes();
-        EndDrawing();
-    }
-
-    CloseWindow();
 }
 
-void Engine::updateMatricies() {
+void Engine::updateMatricies(SceneObject obj) {
 
     // Perspective
     q = farClipPlane/(farClipPlane-nearClipPlane);
@@ -64,36 +41,39 @@ void Engine::updateMatricies() {
 
     // Setup Rotation Matricies
     xRotMat.mat[0][0] = 1;
-    xRotMat.mat[1][1] = std::cos(xRotAngle);
-    xRotMat.mat[2][2] = std::cos(xRotAngle);
-    xRotMat.mat[2][1] = std::sin(xRotAngle);
-    xRotMat.mat[1][2] = -std::sin(xRotAngle);
+    xRotMat.mat[1][1] = std::cos(obj.rot.x);
+    xRotMat.mat[2][2] = std::cos(obj.rot.x);
+    xRotMat.mat[2][1] = std::sin(obj.rot.x);
+    xRotMat.mat[1][2] = -std::sin(obj.rot.x);
     
-    yRotMat.mat[0][0] = std::cos(yRotAngle);
+    yRotMat.mat[0][0] = std::cos(obj.rot.y);
     yRotMat.mat[1][1] = 1;
-    yRotMat.mat[2][2] = std::cos(yRotAngle);
-    yRotMat.mat[0][2] = std::sin(yRotAngle);
-    yRotMat.mat[2][0] = -std::sin(yRotAngle);
+    yRotMat.mat[2][2] = std::cos(obj.rot.y);
+    yRotMat.mat[0][2] = std::sin(obj.rot.y);
+    yRotMat.mat[2][0] = -std::sin(obj.rot.y);
 
-    zRotMat.mat[0][0] = std::cos(zRotAngle);
-    zRotMat.mat[1][1] = std::cos(zRotAngle);
+    zRotMat.mat[0][0] = std::cos(obj.rot.z);
+    zRotMat.mat[1][1] = std::cos(obj.rot.z);
     zRotMat.mat[2][2] = 1;
-    zRotMat.mat[1][0] = std::sin(zRotAngle);
-    zRotMat.mat[0][1] = -std::sin(zRotAngle);
+    zRotMat.mat[1][0] = std::sin(obj.rot.z);
+    zRotMat.mat[0][1] = -std::sin(obj.rot.z);
 
     // Translation
     translationOffsetMatrix.mat[0][0] = 1.0f;
-    translationOffsetMatrix.mat[3][0] = x_offset;
+    translationOffsetMatrix.mat[3][0] = obj.pos.x;
     translationOffsetMatrix.mat[1][1] = 1.0f;
-    translationOffsetMatrix.mat[3][1] = y_offset;
+    translationOffsetMatrix.mat[3][1] = obj.pos.y;
     translationOffsetMatrix.mat[2][2] = 1.0f;
-    translationOffsetMatrix.mat[3][2] = z_offset;
+    translationOffsetMatrix.mat[3][2] = obj.pos.z;
     translationOffsetMatrix.mat[2][3] = 0.0f;
     translationOffsetMatrix.mat[3][3] = 1.0f;
 }
 
-void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
+void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     Tri3D projected, xRotated, yRotated, zRotated, translated;
+
+
+    updateMatricies(obj);
 
     // X Rotation
     multiplyMatrix4x4(xRotMat, tri.vecs[0], xRotated.vecs[0]);
@@ -156,8 +136,6 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
         */
         
 
-        
-
         drawTriangle2D(
             projected.vecs[0].x, projected.vecs[0].y,
             projected.vecs[1].x, projected.vecs[1].y,
@@ -184,13 +162,9 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     //DrawCircle(x3, y3, 4, BLUE);
 }
 
-void Engine::drawMeshes() {
-    drawMesh(perspective, testCube);
-};
-
-void Engine::drawMesh(Mat4x4 matrix, Mesh3D mesh) {
-    for (const auto& tri : mesh.tris) {
-        drawTriangle3D(matrix, tri);
+void Engine::drawMesh(Mat4x4 matrix, SceneObject obj) {
+    for (const auto& tri : obj.mesh.tris) {
+        drawTriangle3D(matrix, tri, obj);
     }
 }
 
@@ -222,50 +196,5 @@ void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
         out.x /= w;
         out.y /= w;
         out.z /= w;
-    }
-}
-
-void Engine::inputHandler() {
-    if (IsKeyDown(KEY_UP)) {
-        z_offset += 0.20f;
-        updateMatricies();
-    }
-
-    if (IsKeyDown(KEY_DOWN)) {
-        z_offset -= 0.20f;
-        updateMatricies();  
-    }
-
-    if (IsKeyDown(KEY_RIGHT)) {
-        x_offset += 0.20f;
-        updateMatricies();
-    }
-
-    if (IsKeyDown(KEY_LEFT)) {
-        x_offset -= 0.20f;
-        updateMatricies();  
-    }
-
-    if (IsKeyDown(KEY_LEFT_SHIFT)) {
-        y_offset -= 0.20f;
-        updateMatricies();
-    }
-
-    if (IsKeyDown(KEY_LEFT_CONTROL)) {
-        y_offset += 0.20f;
-        updateMatricies();  
-    }
-
-    if (IsKeyPressed(KEY_F11)) {
-        if (!IsWindowFullscreen()) {
-            int monitor = GetCurrentMonitor();
-            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-            ToggleFullscreen();
-        }
-        else {
-            int monitor = GetCurrentMonitor();
-            SetWindowSize(1000, 700);
-            ToggleFullscreen();
-        }
     }
 }

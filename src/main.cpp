@@ -1,9 +1,84 @@
 #include "headers/engine.h"
+#include "headers/sceneObject.h"
+#include "headers/presets.h"
+
+SceneObject floorPlane;
+SceneObject ship;
+
+
+void inputHandler() {
+    if (IsKeyDown(KEY_UP)) {
+        ship.pos.z += 0.20f;
+    }
+
+    if (IsKeyDown(KEY_DOWN)) {
+        ship.pos.z -= 0.20f; 
+    }
+
+    if (IsKeyDown(KEY_RIGHT)) {
+        ship.pos.x += 0.20f;
+    }
+
+    if (IsKeyDown(KEY_LEFT)) {
+        ship.pos.x -= 0.20f;  
+    }
+
+    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+        ship.pos.y -= 0.20f;
+    }
+
+    if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        ship.pos.y += 0.20f;
+    }
+
+    if (IsKeyPressed(KEY_F11)) {
+        if (!IsWindowFullscreen()) {
+            int monitor = GetCurrentMonitor();
+            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+            ToggleFullscreen();
+        }
+        else {
+            int monitor = GetCurrentMonitor();
+            SetWindowSize(1000, 700);
+            ToggleFullscreen();
+        }
+    }
+}
 
 int main(void)
 {
     //Class Instance
     Engine engine;
+
+    ship.loadMeshFromObjectFile("../meshes/ship.obj");
+    floorPlane.loadMeshFromObjectFile("../meshes/plane.obj");
+
+    floorPlane.pos.z = 15.0f;
+    floorPlane.pos.y = 6;
+
+    ship.pos.z = 15.0f;
+    ship.pos.y = 3.0f;
+    
+
+    while (!WindowShouldClose())
+    {
+        engine.width = GetScreenWidth();
+        engine.height = GetScreenHeight();
+        engine.aspectRatio = (float)engine.height/(float)engine.width;
+
+        ship.rot.x += 0.01f;
+
+        inputHandler();
+
+        BeginDrawing();
+            ClearBackground(BLACK);
+            
+            engine.drawMesh(engine.perspective, ship);
+            engine.drawMesh(engine.perspective, floorPlane);
+        EndDrawing();
+    }
+
+    CloseWindow();
 
     return 0;
 }
