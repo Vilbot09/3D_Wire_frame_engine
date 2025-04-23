@@ -4,13 +4,92 @@
 #include <fstream>
 #include <strstream>
 #include <string>
+#include <cmath>
+
+struct Mat4x4 {
+    float mat[4][4] = {0};
+};
 
 struct Vec3D {
-    float x, y, z;
+    //float x, y, z;
+
+    union {
+        struct {float x, y, z;};
+    };
+
+    Vec3D() {
+        x = y = z = 0;
+    }
+
+    Vec3D(float a, float b, float c) {
+        x = a; y = b; z = c;
+    }
+
+    float length() {
+        return std::sqrt(x*x + y*y + z*z);
+    }
+
+    float dot(const Vec3D& p) {
+        return x*p.x + y*p.y + z*p.z;
+    }
+
+    Vec3D cross(const Vec3D& p) {
+        return Vec3D(
+            y * p.z - z * p.y,
+            z * p.x - x * p.z,
+            x * p.y - y * p.x
+        );
+    }
+
+    Vec3D& operator+=(const Vec3D& p) {
+        this->x += p.x;
+        this->y += p.y;
+        this->z += p.z;
+        return *this;
+    }
+
+    Vec3D& operator-=(const Vec3D& p) {
+        this->x -= p.x;
+        this->y -= p.y;
+        this->z -= p.z;
+        return *this;
+    }
+
+    Vec3D& operator*=(const Vec3D& p) {
+        this->x *= p.x;
+        this->y *= p.y;
+        this->z *= p.z;
+        return *this;
+    }
+
+    Vec3D& operator/=(const Vec3D& p) {
+        this->x /= p.x;
+        this->y /= p.y;
+        this->z /= p.z;
+        return *this;
+    }
+
+    Vec3D& operator*=(const Mat4x4& m) {
+        const float inX = this->x;
+        const float inY = this->y;
+        const float inZ = this->z;
+
+        this->x = inX * m.mat[0][0] + inY * m.mat[1][0] + inZ * m.mat[2][0] + m.mat[3][0];
+        this->y = inX * m.mat[0][1] + inY * m.mat[1][1] + inZ * m.mat[2][1] + m.mat[3][1];
+        this->z = inX * m.mat[0][2] + inY * m.mat[1][2] + inZ * m.mat[2][2] + m.mat[3][2];
+        return *this;
+    }
 };
 
 struct Tri3D {
     Vec3D vecs[3];
+
+    Tri3D& operator*=(const Mat4x4& m) {
+        this->vecs[0] *= m;
+        this->vecs[1] *= m;
+        this->vecs[2] *= m;
+        return *this;
+    }
 };
 
 struct Mesh3D {
@@ -52,8 +131,4 @@ struct Mesh3D {
 
         return true;
     }
-};
-
-struct Mat4x4 {
-    float mat[4][4] = {0};
 };

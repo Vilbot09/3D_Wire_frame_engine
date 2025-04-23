@@ -4,7 +4,7 @@
 #include <vector>
 
 namespace MeshPreset {
-    std::vector<Tri3D> cube = {
+    /*std::vector<Tri3D> cube = {
         // SOUTH
         { 0.0f, 0.0f, 0.0f,    0.0f, 1.0f, 0.0f,    1.0f, 1.0f, 0.0f },
         { 0.0f, 0.0f, 0.0f,    1.0f, 1.0f, 0.0f,    1.0f, 0.0f, 0.0f },
@@ -47,6 +47,6 @@ namespace MeshPreset {
         // BOTTOM
         {0, 0, 1,     0, 0, 0,        1, 0, 0},
         {0, 0, 1,     1, 0, 0,        1, 0, 1},
-    };
+    };*/
 }
 

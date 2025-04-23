@@ -1,35 +1,27 @@
 #include "headers/engine.h"
 #include "headers/sceneObject.h"
 #include "headers/presets.h"
+#include "headers/mesh.h"
+#include <iostream>
 
 SceneObject floorPlane;
 SceneObject ship;
 
 
 void inputHandler() {
-    if (IsKeyDown(KEY_UP)) {
-        ship.pos.z += 0.20f;
-    }
+    if (IsKeyDown(KEY_W)) ship.pos.z += 0.20f;
+    if (IsKeyDown(KEY_S)) ship.pos.z -= 0.20f; 
+    if (IsKeyDown(KEY_D)) ship.pos.x += 0.20f;
+    if (IsKeyDown(KEY_A)) ship.pos.x -= 0.20f;
+    
+    if (IsKeyDown(KEY_UP)) ship.rot.x += 0.015f;
+    if (IsKeyDown(KEY_DOWN)) ship.rot.x -= 0.015f;
+    if (IsKeyDown(KEY_LEFT)) ship.rot.z += 0.015f;
+    if (IsKeyDown(KEY_RIGHT)) ship.rot.z -= 0.015f;
 
-    if (IsKeyDown(KEY_DOWN)) {
-        ship.pos.z -= 0.20f; 
-    }
 
-    if (IsKeyDown(KEY_RIGHT)) {
-        ship.pos.x += 0.20f;
-    }
-
-    if (IsKeyDown(KEY_LEFT)) {
-        ship.pos.x -= 0.20f;  
-    }
-
-    if (IsKeyDown(KEY_LEFT_SHIFT)) {
-        ship.pos.y -= 0.20f;
-    }
-
-    if (IsKeyDown(KEY_LEFT_CONTROL)) {
-        ship.pos.y += 0.20f;
-    }
+    if (IsKeyDown(KEY_LEFT_SHIFT)) ship.pos.y -= 0.20f;
+    if (IsKeyDown(KEY_LEFT_CONTROL)) ship.pos.y += 0.20f;
 
     if (IsKeyPressed(KEY_F11)) {
         if (!IsWindowFullscreen()) {
@@ -45,8 +37,7 @@ void inputHandler() {
     }
 }
 
-int main(void)
-{
+int main(void)  {
     //Class Instance
     Engine engine;
 
@@ -58,15 +49,19 @@ int main(void)
 
     ship.pos.z = 15.0f;
     ship.pos.y = 3.0f;
+
+
+    Vec3D t1(2, 0, 1);
+    Vec3D t2(3, 2, -2);
+
+    t1 *= engine.simpleProjection;
+    std::cout << t1.z << std::endl;
     
 
-    while (!WindowShouldClose())
-    {
+    while (!WindowShouldClose()) {
         engine.width = GetScreenWidth();
         engine.height = GetScreenHeight();
         engine.aspectRatio = (float)engine.height/(float)engine.width;
-
-        ship.rot.x += 0.01f;
 
         inputHandler();
 

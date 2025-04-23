@@ -70,11 +70,17 @@ void Engine::updateMatricies(SceneObject obj) {
 }
 
 void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
-    Tri3D projected, xRotated, yRotated, zRotated, translated;
-
-
+    Tri3D projected, xRotated, xyRotated, zyxRotated, transformed;
+    
+    transformed = tri;
     updateMatricies(obj);
 
+    transformed *= xRotMat;
+    transformed *= yRotMat;
+    transformed *= zRotMat;
+    transformed *= translationOffsetMatrix;
+
+    /*
     // X Rotation
     multiplyMatrix4x4(xRotMat, tri.vecs[0], xRotated.vecs[0]);
     multiplyMatrix4x4(xRotMat, tri.vecs[1], xRotated.vecs[1]);
@@ -91,9 +97,11 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     multiplyMatrix4x4(zRotMat, yRotated.vecs[2], zRotated.vecs[2]);
 
     // Translate
+    
     multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[0], translated.vecs[0]);
     multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[1], translated.vecs[1]);
     multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[2], translated.vecs[2]);
+    */
 
     Vec3D towardPlayer;
     towardPlayer.x = 0;
@@ -101,7 +109,7 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     towardPlayer.z = -1;
 
     Vec3D normal;
-    calculateNormalVector(translated, normal); 
+    calculateNormalVector(transformed, normal); 
 
     // Dot Product
     float dot = normal.x*towardPlayer.x+normal.y*towardPlayer.y+normal.z*towardPlayer.z;
@@ -109,9 +117,10 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     dot = 1;
     if (dot > 0) {
         // Projection
-        multiplyMatrix4x4(matrix, translated.vecs[0], projected.vecs[0]);
-        multiplyMatrix4x4(matrix, translated.vecs[1], projected.vecs[1]);
-        multiplyMatrix4x4(matrix, translated.vecs[2], projected.vecs[2]);
+        multiplyMatrix4x4(matrix, transformed.vecs[0], projected.vecs[0]);
+        multiplyMatrix4x4(matrix, transformed.vecs[1], projected.vecs[1]);
+        multiplyMatrix4x4(matrix, transformed.vecs[2], projected.vecs[2]);
+        
 
         // Scale into view for perspective
         
