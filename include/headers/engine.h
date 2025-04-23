@@ -71,6 +71,17 @@ public:
     Mat4x4 yRotMat;
     Mat4x4 zRotMat;
 
+    // Translation Matrix
+    Mat4x4 translationOffsetMatrix;
+
+    float xRotAngle = 0.0f;
+    float yRotAngle = 10.0f;
+    float zRotAngle = 0.0f;
+
+    float x_offset = 0.0f;
+    float y_offset = 0.0f;
+    float z_offset = 10.0f;
+
 
     int width = 1000;
     int height = 700;
@@ -78,7 +89,7 @@ public:
     float aspectRatio = (float)height/(float)width;
     float FOV = 90.0f;
     float FOVRad = 1.0f / std::tan(FOV * 0.5f / 180.0f * 3.141592f);
-    float nearClipPlane = 10.0f;
+    float nearClipPlane = 0.1f;
     float farClipPlane = 10000.0f;
     float q = farClipPlane/(farClipPlane-nearClipPlane);
 
@@ -91,4 +102,7 @@ public:
     void drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
     void drawMesh(Mat4x4, Mesh3D);
     void drawMeshes();
+    void updateMatricies();
+
+    void inputHandler();
 };

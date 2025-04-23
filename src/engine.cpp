@@ -16,73 +16,34 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    //testCube.LoadFromObjectFile("../meshes/ship.obj");
-    testCube.tris = MeshPreset::cube;
+    testCube.LoadFromObjectFile("../meshes/ship.obj");
+    //testCube.tris = MeshPreset::cube;
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
     simpleProjection.mat[2][2] = 1;
     simpleProjection.mat[3][3] = 1;
 
-    perspective.mat[0][0] = aspectRatio*FOVRad;
-    perspective.mat[1][1] = FOVRad;
-    perspective.mat[2][2] = q;
-    perspective.mat[3][2] = -nearClipPlane*q;
-    perspective.mat[2][3] = 1.0f;
-    perspective.mat[3][3] = 0.0f;
+    //Change into separate function
+    updateMatricies();
     std::cout << perspective.mat[0][0] << std::endl;
     std::cout.flush();
-
-    float xRotAngle = 0.0f;
-    float yRotAngle = 10.0f;
-    float zRotAngle = 0.0f;
 
     while (!WindowShouldClose())
     {
         width = GetScreenWidth();
         height = GetScreenHeight();
         aspectRatio = (float)height/(float)width;
-        perspective.mat[0][0] = aspectRatio*FOVRad;
-
 
         xRotAngle += 0.01f;
         yRotAngle += 0.00f;
         zRotAngle += 0.00f;
 
-        if (IsKeyPressed(KEY_F11)) {
-            if (!IsWindowFullscreen()) {
-                int monitor = GetCurrentMonitor();
-                SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
-                ToggleFullscreen();
-            }
-            else {
-                int monitor = GetCurrentMonitor();
-                SetWindowSize(1000, 700);
-                ToggleFullscreen();
-            }
-        }
-
-        // Setup Rotation Matricies
-        xRotMat.mat[0][0] = 1;
-        xRotMat.mat[1][1] = std::cos(xRotAngle);
-        xRotMat.mat[2][2] = std::cos(xRotAngle);
-        xRotMat.mat[2][1] = std::sin(xRotAngle);
-        xRotMat.mat[1][2] = -std::sin(xRotAngle);
-        
-        yRotMat.mat[0][0] = std::cos(yRotAngle);
-        yRotMat.mat[1][1] = 1;
-        yRotMat.mat[2][2] = std::cos(yRotAngle);
-        yRotMat.mat[0][2] = std::sin(yRotAngle);
-        yRotMat.mat[2][0] = -std::sin(yRotAngle);
-
-        zRotMat.mat[0][0] = std::cos(zRotAngle);
-        zRotMat.mat[1][1] = std::cos(zRotAngle);
-        zRotMat.mat[2][2] = 1;
-        zRotMat.mat[1][0] = std::sin(zRotAngle);
-        zRotMat.mat[0][1] = -std::sin(zRotAngle);
+        updateMatricies();
+        inputHandler();
 
         BeginDrawing();
-            ClearBackground(RAYWHITE);
+            ClearBackground(BLACK);
             drawMeshes();
         EndDrawing();
     }
@@ -90,8 +51,49 @@ Engine::Engine() {
     CloseWindow();
 }
 
+void Engine::updateMatricies() {
+
+    // Perspective
+    q = farClipPlane/(farClipPlane-nearClipPlane);
+    perspective.mat[0][0] = aspectRatio*FOVRad;
+    perspective.mat[1][1] = FOVRad;
+    perspective.mat[2][2] = q;
+    perspective.mat[3][2] = -nearClipPlane*q;
+    perspective.mat[2][3] = 1.0f;
+    perspective.mat[3][3] = 0.0f;
+
+    // Setup Rotation Matricies
+    xRotMat.mat[0][0] = 1;
+    xRotMat.mat[1][1] = std::cos(xRotAngle);
+    xRotMat.mat[2][2] = std::cos(xRotAngle);
+    xRotMat.mat[2][1] = std::sin(xRotAngle);
+    xRotMat.mat[1][2] = -std::sin(xRotAngle);
+    
+    yRotMat.mat[0][0] = std::cos(yRotAngle);
+    yRotMat.mat[1][1] = 1;
+    yRotMat.mat[2][2] = std::cos(yRotAngle);
+    yRotMat.mat[0][2] = std::sin(yRotAngle);
+    yRotMat.mat[2][0] = -std::sin(yRotAngle);
+
+    zRotMat.mat[0][0] = std::cos(zRotAngle);
+    zRotMat.mat[1][1] = std::cos(zRotAngle);
+    zRotMat.mat[2][2] = 1;
+    zRotMat.mat[1][0] = std::sin(zRotAngle);
+    zRotMat.mat[0][1] = -std::sin(zRotAngle);
+
+    // Translation
+    translationOffsetMatrix.mat[0][0] = 1.0f;
+    translationOffsetMatrix.mat[3][0] = x_offset;
+    translationOffsetMatrix.mat[1][1] = 1.0f;
+    translationOffsetMatrix.mat[3][1] = y_offset;
+    translationOffsetMatrix.mat[2][2] = 1.0f;
+    translationOffsetMatrix.mat[3][2] = z_offset;
+    translationOffsetMatrix.mat[2][3] = 0.0f;
+    translationOffsetMatrix.mat[3][3] = 1.0f;
+}
+
 void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
-    Tri3D projected, xRotated, yRotated, zRotated;
+    Tri3D projected, xRotated, yRotated, zRotated, translated;
 
     // X Rotation
     multiplyMatrix4x4(xRotMat, tri.vecs[0], xRotated.vecs[0]);
@@ -109,9 +111,9 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     multiplyMatrix4x4(zRotMat, yRotated.vecs[2], zRotated.vecs[2]);
 
     // Translate
-    zRotated.vecs[0].z += 10;
-    zRotated.vecs[1].z += 10;
-    zRotated.vecs[2].z += 10;
+    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[0], translated.vecs[0]);
+    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[1], translated.vecs[1]);
+    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[2], translated.vecs[2]);
 
     Vec3D towardPlayer;
     towardPlayer.x = 0;
@@ -119,7 +121,7 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     towardPlayer.z = -1;
 
     Vec3D normal;
-    calculateNormalVector(zRotated, normal); 
+    calculateNormalVector(translated, normal); 
 
     // Dot Product
     float dot = normal.x*towardPlayer.x+normal.y*towardPlayer.y+normal.z*towardPlayer.z;
@@ -127,9 +129,9 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
     dot = 1;
     if (dot > 0) {
         // Projection
-        multiplyMatrix4x4(matrix, zRotated.vecs[0], projected.vecs[0]);
-        multiplyMatrix4x4(matrix, zRotated.vecs[1], projected.vecs[1]);
-        multiplyMatrix4x4(matrix, zRotated.vecs[2], projected.vecs[2]);
+        multiplyMatrix4x4(matrix, translated.vecs[0], projected.vecs[0]);
+        multiplyMatrix4x4(matrix, translated.vecs[1], projected.vecs[1]);
+        multiplyMatrix4x4(matrix, translated.vecs[2], projected.vecs[2]);
 
         // Scale into view for perspective
         
@@ -165,9 +167,9 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri) {
 }
 
 void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
-    DrawLine(x1, y1, x2, y2, BLACK);
-    DrawLine(x2, y2, x3, y3, BLACK);
-    DrawLine(x3, y3, x1, y1, BLACK);
+    DrawLine(x1, y1, x2, y2, WHITE);
+    DrawLine(x2, y2, x3, y3, WHITE);
+    DrawLine(x3, y3, x1, y1, WHITE);
 
     /*
     Vector2 v1 = {(float)x1, (float)y1};
@@ -211,18 +213,59 @@ void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
 }
 
 void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
-    
-    
     out.x = matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z + matrix.mat[3][0];
     out.y = matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z + matrix.mat[3][1];
     out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z + matrix.mat[3][2];
     float w = matrix.mat[0][3] * in.x + matrix.mat[1][3] * in.y + matrix.mat[2][3] * in.z + matrix.mat[3][3];
 
-    
     if (w != 0.0f) {
         out.x /= w;
         out.y /= w;
         out.z /= w;
     }
+}
 
+void Engine::inputHandler() {
+    if (IsKeyDown(KEY_UP)) {
+        z_offset += 0.20f;
+        updateMatricies();
+    }
+
+    if (IsKeyDown(KEY_DOWN)) {
+        z_offset -= 0.20f;
+        updateMatricies();  
+    }
+
+    if (IsKeyDown(KEY_RIGHT)) {
+        x_offset += 0.20f;
+        updateMatricies();
+    }
+
+    if (IsKeyDown(KEY_LEFT)) {
+        x_offset -= 0.20f;
+        updateMatricies();  
+    }
+
+    if (IsKeyDown(KEY_LEFT_SHIFT)) {
+        y_offset -= 0.20f;
+        updateMatricies();
+    }
+
+    if (IsKeyDown(KEY_LEFT_CONTROL)) {
+        y_offset += 0.20f;
+        updateMatricies();  
+    }
+
+    if (IsKeyPressed(KEY_F11)) {
+        if (!IsWindowFullscreen()) {
+            int monitor = GetCurrentMonitor();
+            SetWindowSize(GetMonitorWidth(monitor), GetMonitorHeight(monitor));
+            ToggleFullscreen();
+        }
+        else {
+            int monitor = GetCurrentMonitor();
+            SetWindowSize(1000, 700);
+            ToggleFullscreen();
+        }
+    }
 }
