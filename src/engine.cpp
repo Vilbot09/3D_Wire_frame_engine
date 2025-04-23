@@ -16,8 +16,8 @@ Engine::Engine() {
     SetWindowIcon(icon);
     UnloadImage(icon);
 
-    testCube.LoadFromObjectFile("../meshes/test.obj");
-    //testCube.tris = MeshPreset::cube;
+    //testCube.LoadFromObjectFile("../meshes/ship.obj");
+    testCube.tris = MeshPreset::cube;
 
     simpleProjection.mat[0][0] = 1;
     simpleProjection.mat[1][1] = 1;
@@ -27,15 +27,15 @@ Engine::Engine() {
     perspective.mat[0][0] = aspectRatio*FOVRad;
     perspective.mat[1][1] = FOVRad;
     perspective.mat[2][2] = q;
-    perspective.mat[2][3] = -nearClipPlane*q;
-    perspective.mat[3][2] = 1.0f;
+    perspective.mat[3][2] = -nearClipPlane*q;
+    perspective.mat[2][3] = 1.0f;
     perspective.mat[3][3] = 0.0f;
     std::cout << perspective.mat[0][0] << std::endl;
     std::cout.flush();
 
-    float xRotAngle;
-    float yRotAngle;
-    float zRotAngle;
+    float xRotAngle = 0.0f;
+    float yRotAngle = 10.0f;
+    float zRotAngle = 0.0f;
 
     while (!WindowShouldClose())
     {
@@ -46,8 +46,8 @@ Engine::Engine() {
 
 
         xRotAngle += 0.01f;
-        yRotAngle += 0.01f;
-        zRotAngle += 0.01f;
+        yRotAngle += 0.00f;
+        zRotAngle += 0.00f;
 
         if (IsKeyPressed(KEY_F11)) {
             if (!IsWindowFullscreen()) {

@@ -78,8 +78,8 @@ public:
     float aspectRatio = (float)height/(float)width;
     float FOV = 90.0f;
     float FOVRad = 1.0f / std::tan(FOV * 0.5f / 180.0f * 3.141592f);
-    float nearClipPlane = 1.0f;
-    float farClipPlane = 1000.0f;
+    float nearClipPlane = 10.0f;
+    float farClipPlane = 10000.0f;
     float q = farClipPlane/(farClipPlane-nearClipPlane);
 
 
