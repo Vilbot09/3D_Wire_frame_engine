@@ -35,10 +35,12 @@ public:
 
     Engine();
     
-    void multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out);
-    void calculateNormalVector(Tri3D tri, Vec3D &out);
+    // void multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out);
+    // void calculateNormalVector(Tri3D tri, Vec3D &out);
     void drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj);
     void drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
-    void drawMesh(Mat4x4 matrix, SceneObject obj);
+    void drawObject(Mat4x4 matrix, SceneObject obj);
     void updateMatricies(SceneObject obj);
+
+    Mat4x4 makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up);
 };

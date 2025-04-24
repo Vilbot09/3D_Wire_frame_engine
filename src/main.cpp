@@ -46,16 +46,8 @@ int main(void)  {
 
     floorPlane.pos.z = 15.0f;
     floorPlane.pos.y = 6;
-
     ship.pos.z = 15.0f;
     ship.pos.y = 3.0f;
-
-
-    Vec3D t1(2, 0, 1);
-    Vec3D t2(3, 2, -2);
-
-    t1 *= engine.simpleProjection;
-    std::cout << t1.z << std::endl;
     
 
     while (!WindowShouldClose()) {
@@ -68,8 +60,8 @@ int main(void)  {
         BeginDrawing();
             ClearBackground(BLACK);
             
-            engine.drawMesh(engine.perspective, ship);
-            engine.drawMesh(engine.perspective, floorPlane);
+            engine.drawObject(engine.perspective, ship);
+            engine.drawObject(engine.perspective, floorPlane);
         EndDrawing();
     }
 

@@ -70,11 +70,12 @@ void Engine::updateMatricies(SceneObject obj) {
 }
 
 void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
-    Tri3D projected, xRotated, xyRotated, zyxRotated, transformed;
+    Tri3D projected, transformed;
     
-    transformed = tri;
+    
     updateMatricies(obj);
 
+    transformed = tri;
     transformed *= xRotMat;
     transformed *= yRotMat;
     transformed *= zRotMat;
@@ -102,55 +103,55 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[1], translated.vecs[1]);
     multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[2], translated.vecs[2]);
     */
+    // Projection
+    /*
+    multiplyMatrix4x4(matrix, transformed.vecs[0], projected.vecs[0]);
+    multiplyMatrix4x4(matrix, transformed.vecs[1], projected.vecs[1]);
+    multiplyMatrix4x4(matrix, transformed.vecs[2], projected.vecs[2]);
+    */
+    projected = transformed;
+    projected *= matrix; 
 
-    Vec3D towardPlayer;
-    towardPlayer.x = 0;
-    towardPlayer.y = 0;
-    towardPlayer.z = -1;
+    // Divide by W
+    projected.vecs[0] /= projected.vecs[0].w;
+    projected.vecs[1] /= projected.vecs[1].w;
+    projected.vecs[2] /= projected.vecs[2].w;
 
-    Vec3D normal;
-    calculateNormalVector(transformed, normal); 
+    // Scale into view
+    projected += 1.0f;
+    projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
+    projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
+    projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
 
-    // Dot Product
-    float dot = normal.x*towardPlayer.x+normal.y*towardPlayer.y+normal.z*towardPlayer.z;
+    // Scale into view for perspective
+    /*
+    projected.vecs[0].x += 1.0f; projected.vecs[0].y += 1.0f;
+    projected.vecs[1].x += 1.0f; projected.vecs[1].y += 1.0f;
+    projected.vecs[2].x += 1.0f; projected.vecs[2].y += 1.0f;
+    
+    projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
+    projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
+    projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
+    */
 
-    dot = 1;
-    if (dot > 0) {
-        // Projection
-        multiplyMatrix4x4(matrix, transformed.vecs[0], projected.vecs[0]);
-        multiplyMatrix4x4(matrix, transformed.vecs[1], projected.vecs[1]);
-        multiplyMatrix4x4(matrix, transformed.vecs[2], projected.vecs[2]);
-        
+    //Scale into view for simple projection
+    /*
+    projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
+    projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
+    projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
 
-        // Scale into view for perspective
-        
-        projected.vecs[0].x += 1.0f; projected.vecs[0].y += 1.0f;
-        projected.vecs[1].x += 1.0f; projected.vecs[1].y += 1.0f;
-        projected.vecs[2].x += 1.0f; projected.vecs[2].y += 1.0f;
+    projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
+    projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
+    projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
+    */
+    
 
-        projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
-        projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
-        projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
-        
-
-        //Scale into view for simple projection
-        /*
-        projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
-        projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
-        projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
-
-        projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
-        projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
-        projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
-        */
-        
-
-        drawTriangle2D(
-            projected.vecs[0].x, projected.vecs[0].y,
-            projected.vecs[1].x, projected.vecs[1].y,
-            projected.vecs[2].x, projected.vecs[2].y
-        );
-    }
+    drawTriangle2D(
+        projected.vecs[0].x, projected.vecs[0].y,
+        projected.vecs[1].x, projected.vecs[1].y,
+        projected.vecs[2].x, projected.vecs[2].y
+    );
+    
 }
 
 void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
@@ -171,12 +172,13 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     //DrawCircle(x3, y3, 4, BLUE);
 }
 
-void Engine::drawMesh(Mat4x4 matrix, SceneObject obj) {
+void Engine::drawObject(Mat4x4 matrix, SceneObject obj) {
     for (const auto& tri : obj.mesh.tris) {
         drawTriangle3D(matrix, tri, obj);
     }
 }
 
+/*
 void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
     Vec3D U, V;
 
@@ -206,4 +208,24 @@ void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
         out.y /= w;
         out.z /= w;
     }
+}
+*/
+
+Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
+    Vec3D newForward = target - pos;
+    newForward.normalize();
+
+    float dotProduct = up.dot(newForward);
+    Vec3D a = newForward * dotProduct;
+    Vec3D newUp = up - a;
+    newUp.normalize();
+
+    Vec3D newRight = newUp.cross(newForward);
+
+    Mat4x4 newMat;
+    newMat.mat[0][0] = newRight.x;       newMat.mat[0][1] = newRight.y;       newMat.mat[0][2] = newRight.z;      newMat.mat[0][3] = 0.0f;
+    newMat.mat[1][0] = newUp.x;          newMat.mat[1][1] = newUp.y;          newMat.mat[1][2] = newUp.z;         newMat.mat[1][3] = 0.0f;
+    newMat.mat[2][0] = newForward.x;     newMat.mat[2][1] = newForward.y;     newMat.mat[2][2] = newForward.z;    newMat.mat[2][3] = 0.0f;
+    newMat.mat[3][0] = pos.x;            newMat.mat[3][1] = pos.y;            newMat.mat[3][2] = pos.z;           newMat.mat[3][3] = 1.0f;
+    return newMat;
 }

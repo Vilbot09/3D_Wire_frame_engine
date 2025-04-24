@@ -6,6 +6,8 @@
 #include <string>
 #include <cmath>
 
+struct Vec3D;
+
 struct Mat4x4 {
     float mat[4][4] = {0};
 };
@@ -14,7 +16,7 @@ struct Vec3D {
     //float x, y, z;
 
     union {
-        struct {float x, y, z;};
+        struct {float x, y, z, w;};
     };
 
     Vec3D() {
@@ -33,12 +35,26 @@ struct Vec3D {
         return x*p.x + y*p.y + z*p.z;
     }
 
+    Vec3D& normalize() {
+        float len = length();
+        if (len != 0.0f) {
+            this->x /= len;
+            this->y /= len;
+            this->z /= len;
+        }
+        return *this;
+    }
+
     Vec3D cross(const Vec3D& p) {
-        return Vec3D(
-            y * p.z - z * p.y,
-            z * p.x - x * p.z,
-            x * p.y - y * p.x
-        );
+        const float inX = this->x;
+        const float inY = this->y;
+        const float inZ = this->z;
+        
+        Vec3D out;
+        out.x = inY * p.z - inZ * p.y;
+        out.y = inZ * p.x - inX * p.z;
+        out.z = inX * p.y - inY * p.x;
+        return out;
     }
 
     Vec3D& operator+=(const Vec3D& p) {
@@ -77,7 +93,48 @@ struct Vec3D {
         this->x = inX * m.mat[0][0] + inY * m.mat[1][0] + inZ * m.mat[2][0] + m.mat[3][0];
         this->y = inX * m.mat[0][1] + inY * m.mat[1][1] + inZ * m.mat[2][1] + m.mat[3][1];
         this->z = inX * m.mat[0][2] + inY * m.mat[1][2] + inZ * m.mat[2][2] + m.mat[3][2];
+        this->w = inX * m.mat[0][3] + inY * m.mat[1][3] + inZ * m.mat[2][3] + m.mat[3][3];
         return *this;
+    }
+
+    Vec3D& operator*=(const float& f) {
+        this->x *= f;
+        this->y *= f;
+        this->z *= f;
+        return *this;
+    }
+
+    Vec3D& operator/=(const float& f) {
+        this->x /= f;
+        this->y /= f;
+        this->z /= f;
+        return *this;
+    }
+
+    Vec3D& operator+=(const float& f) {
+        this->x += f;
+        this->y += f;
+        this->z += f;
+        return *this;
+    }
+
+    Vec3D& operator-=(const float& f) {
+        this->x -= f;
+        this->y -= f;
+        this->z -= f;
+        return *this;
+    }
+
+    Vec3D operator-(const Vec3D& p) {
+        Vec3D newPoint;
+        newPoint -= p;
+        return newPoint;
+    }
+
+    Vec3D operator*(const float& f) {
+        Vec3D newPoint;
+        newPoint *= f;
+        return newPoint;
     }
 };
 
@@ -88,6 +145,13 @@ struct Tri3D {
         this->vecs[0] *= m;
         this->vecs[1] *= m;
         this->vecs[2] *= m;
+        return *this;
+    }
+
+    Tri3D& operator+=(const float& f) {
+        this->vecs[0] += f;
+        this->vecs[1] += f;
+        this->vecs[2] += f;
         return *this;
     }
 };
