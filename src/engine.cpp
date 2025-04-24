@@ -1,6 +1,7 @@
 #include "headers/sceneObject.h"
 #include "headers/mesh.h"
 #include "headers/engine.h"
+#include "headers/cameraObject.h"
 #include "raylib/raylib.h"
 #include <iostream>
 #include <cmath>
@@ -16,93 +17,40 @@ Engine::Engine() {
     icon = LoadImage("../images/engine.png");
     SetWindowIcon(icon);
     UnloadImage(icon);
-
-    //testCube.LoadFromObjectFile("../meshes/ship.obj");
-    //testCube.tris = MeshPreset::cube;
-
-    //floor.LoadFromObjectFile("../meshes/plane.obj");
-
-    simpleProjection.mat[0][0] = 1;
-    simpleProjection.mat[1][1] = 1;
-    simpleProjection.mat[2][2] = 1;
-    simpleProjection.mat[3][3] = 1;
 }
 
-void Engine::updateMatricies(SceneObject obj) {
-
+void Engine::drawTriangle3D(Tri3D tri, SceneObject obj) {
+    Vec3D upVector = Vec3D(0, 1, 0);
+    Vec3D targetVector = Vec3D(0, 0, 1);
+    Mat4x4 camRotMat = Matrix_RotationY(camera.yaw);
+    camera.lookDir = targetVector * camRotMat;
     targetVector = camera.pos + camera.lookDir;
-    cameraMatrix = makePointAtMatrix(camera.pos, targetVector, upVector);
-    viewMatrix = quickInvertMatrix(cameraMatrix);
 
-    // Perspective
-    q = farClipPlane/(farClipPlane-nearClipPlane);
-    perspective.mat[0][0] = aspectRatio*FOVRad;
-    perspective.mat[1][1] = FOVRad;
-    perspective.mat[2][2] = q;
-    perspective.mat[3][2] = -nearClipPlane*q;
-    perspective.mat[2][3] = 1.0f;
-    perspective.mat[3][3] = 0.0f;
+    Tri3D newTri;
+    newTri = tri;
 
-    // Setup Rotation Matricies
-    xRotMat.mat[0][0] = 1;
-    xRotMat.mat[1][1] = std::cos(obj.rot.x);
-    xRotMat.mat[2][2] = std::cos(obj.rot.x);
-    xRotMat.mat[2][1] = std::sin(obj.rot.x);
-    xRotMat.mat[1][2] = -std::sin(obj.rot.x);
-    
-    yRotMat.mat[0][0] = std::cos(obj.rot.y);
-    yRotMat.mat[1][1] = 1;
-    yRotMat.mat[2][2] = std::cos(obj.rot.y);
-    yRotMat.mat[0][2] = std::sin(obj.rot.y);
-    yRotMat.mat[2][0] = -std::sin(obj.rot.y);
-
-    zRotMat.mat[0][0] = std::cos(obj.rot.z);
-    zRotMat.mat[1][1] = std::cos(obj.rot.z);
-    zRotMat.mat[2][2] = 1;
-    zRotMat.mat[1][0] = std::sin(obj.rot.z);
-    zRotMat.mat[0][1] = -std::sin(obj.rot.z);
-
-    // Translation
-    translationOffsetMatrix.mat[0][0] = 1.0f;
-    translationOffsetMatrix.mat[3][0] = obj.pos.x;
-    translationOffsetMatrix.mat[1][1] = 1.0f;
-    translationOffsetMatrix.mat[3][1] = obj.pos.y;
-    translationOffsetMatrix.mat[2][2] = 1.0f;
-    translationOffsetMatrix.mat[3][2] = obj.pos.z;
-    translationOffsetMatrix.mat[2][3] = 0.0f;
-    translationOffsetMatrix.mat[3][3] = 1.0f;
-}
-
-void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
-    Tri3D projected, transformed;
-    
-    updateMatricies(obj);
-
-    transformed = tri;
-    transformed *= xRotMat;
-    transformed *= yRotMat;
-    transformed *= zRotMat;
-    transformed *= translationOffsetMatrix;
-    transformed *= viewMatrix;
-
-    projected = transformed;
-    projected *= matrix; 
+    newTri *= Matrix_RotationX(obj.rot.x);
+    newTri *= Matrix_RotationY(obj.rot.y);
+    newTri *= Matrix_RotationZ(obj.rot.z);
+    newTri *= Matrix_Translation(obj.pos.x, obj.pos.y, obj.pos.z);
+    newTri *= Matrix_QuickInvert(Matrix_PointAt(camera.pos, targetVector, upVector));
+    newTri *= Matrix_Projection(camera); 
 
     // Divide by W
-    projected.vecs[0] /= projected.vecs[0].w;
-    projected.vecs[1] /= projected.vecs[1].w;
-    projected.vecs[2] /= projected.vecs[2].w;
+    newTri.vecs[0] /= newTri.vecs[0].w;
+    newTri.vecs[1] /= newTri.vecs[1].w;
+    newTri.vecs[2] /= newTri.vecs[2].w;
 
     // Scale into view
-    projected += 1.0f;
-    projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
-    projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
-    projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
+    newTri += 1.0f;
+    newTri.vecs[0].x *= camera.width * 0.5f; newTri.vecs[0].y *= camera.height * 0.5f;
+    newTri.vecs[1].x *= camera.width * 0.5f; newTri.vecs[1].y *= camera.height * 0.5f;
+    newTri.vecs[2].x *= camera.width * 0.5f; newTri.vecs[2].y *= camera.height * 0.5f;
 
     drawTriangle2D(
-        projected.vecs[0].x, projected.vecs[0].y,
-        projected.vecs[1].x, projected.vecs[1].y,
-        projected.vecs[2].x, projected.vecs[2].y
+        newTri.vecs[0].x, newTri.vecs[0].y,
+        newTri.vecs[1].x, newTri.vecs[1].y,
+        newTri.vecs[2].x, newTri.vecs[2].y
     );
     
 }
@@ -125,13 +73,68 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     //DrawCircle(x3, y3, 4, BLUE);
 }
 
-void Engine::drawObject(Mat4x4 matrix, SceneObject obj) {
+void Engine::drawObject(SceneObject obj) {
     for (const auto& tri : obj.mesh.tris) {
-        drawTriangle3D(matrix, tri, obj);
+        drawTriangle3D(tri, obj);
     }
 }
 
-Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
+Mat4x4 Engine::Matrix_RotationX(float rad) {
+    Mat4x4 matrix;
+    matrix.mat[0][0] = 1;
+    matrix.mat[1][1] = std::cos(rad);
+    matrix.mat[2][2] = std::cos(rad);
+    matrix.mat[2][1] = std::sin(rad);
+    matrix.mat[1][2] = -std::sin(rad);
+    return matrix;
+}
+
+Mat4x4 Engine::Matrix_RotationY(float rad) {
+    Mat4x4 matrix;
+    matrix.mat[0][0] = std::cos(rad);
+    matrix.mat[1][1] = 1;
+    matrix.mat[2][2] = std::cos(rad);
+    matrix.mat[0][2] = std::sin(rad);
+    matrix.mat[2][0] = -std::sin(rad);
+    return matrix;
+}
+
+Mat4x4 Engine::Matrix_RotationZ(float rad) {
+    Mat4x4 matrix;
+    matrix.mat[0][0] = std::cos(rad);
+    matrix.mat[1][1] = std::cos(rad);
+    matrix.mat[2][2] = 1;
+    matrix.mat[1][0] = std::sin(rad);
+    matrix.mat[0][1] = -std::sin(rad);
+    return matrix;
+}
+
+Mat4x4 Engine::Matrix_Translation(float tX, float tY, float tZ) {
+    Mat4x4 matrix;
+    matrix.mat[0][0] = 1.0f;
+    matrix.mat[1][1] = 1.0f;
+    matrix.mat[2][2] = 1.0f;
+    matrix.mat[3][3] = 1.0f;
+    matrix.mat[3][0] = tX;
+    matrix.mat[3][1] = tY;
+    matrix.mat[3][2] = tZ;
+    return matrix;
+}
+
+Mat4x4 Engine::Matrix_Projection(CameraObject camera) {
+    float fRatio = camera.fFar / (camera.fFar - camera.fNear);
+
+    Mat4x4 matrix;
+    matrix.mat[0][0] = camera.fAspectRatio * camera.fFovRad;
+    matrix.mat[1][1] = camera.fFovRad;
+    matrix.mat[2][2] = fRatio;
+    matrix.mat[3][2] = -camera.fNear * fRatio;
+    matrix.mat[2][3] = 1.0f;
+    matrix.mat[3][3] = 0.0f;
+    return matrix;
+}
+
+Mat4x4 Engine::Matrix_PointAt(Vec3D pos, Vec3D target, Vec3D up) {
     Vec3D newForward = target - pos;
     newForward.normalize();
 
@@ -153,7 +156,7 @@ Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
     return newMat;
 }
 
-Mat4x4 Engine::quickInvertMatrix(Mat4x4 m) {
+Mat4x4 Engine::Matrix_QuickInvert(Mat4x4 m) {
     Mat4x4 matrix;
     matrix.mat[0][0] = m.mat[0][0]; matrix.mat[0][1] = m.mat[1][0]; matrix.mat[0][2] = m.mat[2][0]; matrix.mat[0][3] = 0.0f;
     matrix.mat[1][0] = m.mat[0][1]; matrix.mat[1][1] = m.mat[1][1]; matrix.mat[1][2] = m.mat[2][1]; matrix.mat[1][3] = 0.0f;

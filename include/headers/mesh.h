@@ -147,6 +147,13 @@ struct Vec3D {
         newPoint += f;
         return newPoint;
     }
+
+    Vec3D operator*(const Mat4x4& m) {
+        Vec3D newPoint = Vec3D(this->x, this->y, this->z);
+        newPoint.w = this->w;
+        newPoint *= m;
+        return newPoint;
+    }
 };
 
 struct Tri3D {

@@ -10,15 +10,15 @@ SceneObject ship;
 
 
 void inputHandler(CameraObject &camera) {
-    if (IsKeyDown(KEY_RIGHT)) camera.yaw += 0.1f;
-    if (IsKeyDown(KEY_LEFT)) camera.yaw -= 0.1f;
+    if (IsKeyDown(KEY_RIGHT)) camera.yaw -= 0.01f;
+    if (IsKeyDown(KEY_LEFT)) camera.yaw += 0.01f;
 
     Vec3D fowardVector = camera.lookDir * 0.2f;
 
     if (IsKeyDown(KEY_W)) camera.pos += fowardVector;
     if (IsKeyDown(KEY_S)) camera.pos -= fowardVector; 
-    if (IsKeyDown(KEY_D)) camera.pos.x += 0.20f;
-    if (IsKeyDown(KEY_A)) camera.pos.x -= 0.20f;
+    //if (IsKeyDown(KEY_D)) camera.pos.x += 0.20f;
+    //if (IsKeyDown(KEY_A)) camera.pos.x -= 0.20f;
 
 
 
@@ -61,9 +61,9 @@ int main(void)  {
     
 
     while (!WindowShouldClose()) {
-        engine.width = GetScreenWidth();
-        engine.height = GetScreenHeight();
-        engine.aspectRatio = (float)engine.height/(float)engine.width;
+        engine.camera.width = GetScreenWidth();
+        engine.camera.height = GetScreenHeight();
+        engine.camera.fAspectRatio = (float)engine.camera.height/(float)engine.camera.width;
         
         ship.rot.y += 0.01f;
 
@@ -72,8 +72,8 @@ int main(void)  {
         BeginDrawing();
             ClearBackground(BLACK);
             
-            engine.drawObject(engine.perspective, ship);
-            engine.drawObject(engine.perspective, floorPlane);
+            engine.drawObject(ship);
+            engine.drawObject(floorPlane);
         EndDrawing();
     }
 
