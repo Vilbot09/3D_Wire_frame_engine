@@ -2,26 +2,36 @@
 #include "headers/sceneObject.h"
 #include "headers/presets.h"
 #include "headers/mesh.h"
+#include "headers/cameraObject.h"
 #include <iostream>
 
 SceneObject floorPlane;
 SceneObject ship;
 
 
-void inputHandler() {
-    if (IsKeyDown(KEY_W)) ship.pos.z += 0.20f;
-    if (IsKeyDown(KEY_S)) ship.pos.z -= 0.20f; 
-    if (IsKeyDown(KEY_D)) ship.pos.x += 0.20f;
-    if (IsKeyDown(KEY_A)) ship.pos.x -= 0.20f;
-    
+void inputHandler(CameraObject &camera) {
+    if (IsKeyDown(KEY_RIGHT)) camera.yaw += 0.1f;
+    if (IsKeyDown(KEY_LEFT)) camera.yaw -= 0.1f;
+
+    Vec3D fowardVector = camera.lookDir * 0.2f;
+
+    if (IsKeyDown(KEY_W)) camera.pos += fowardVector;
+    if (IsKeyDown(KEY_S)) camera.pos -= fowardVector; 
+    if (IsKeyDown(KEY_D)) camera.pos.x += 0.20f;
+    if (IsKeyDown(KEY_A)) camera.pos.x -= 0.20f;
+
+
+
+    /*
     if (IsKeyDown(KEY_UP)) ship.rot.x += 0.015f;
     if (IsKeyDown(KEY_DOWN)) ship.rot.x -= 0.015f;
     if (IsKeyDown(KEY_LEFT)) ship.rot.z += 0.015f;
     if (IsKeyDown(KEY_RIGHT)) ship.rot.z -= 0.015f;
+    */
 
-
-    if (IsKeyDown(KEY_LEFT_SHIFT)) ship.pos.y -= 0.20f;
-    if (IsKeyDown(KEY_LEFT_CONTROL)) ship.pos.y += 0.20f;
+    if (IsKeyDown(KEY_LEFT_SHIFT)) camera.pos.y += 0.20f;
+    if (IsKeyDown(KEY_SPACE)) camera.pos.y -= 0.20f;
+    
 
     if (IsKeyPressed(KEY_F11)) {
         if (!IsWindowFullscreen()) {
@@ -54,8 +64,10 @@ int main(void)  {
         engine.width = GetScreenWidth();
         engine.height = GetScreenHeight();
         engine.aspectRatio = (float)engine.height/(float)engine.width;
+        
+        ship.rot.y += 0.01f;
 
-        inputHandler();
+        inputHandler(engine.camera);
 
         BeginDrawing();
             ClearBackground(BLACK);

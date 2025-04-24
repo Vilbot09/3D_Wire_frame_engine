@@ -30,6 +30,10 @@ Engine::Engine() {
 
 void Engine::updateMatricies(SceneObject obj) {
 
+    targetVector = camera.pos + camera.lookDir;
+    cameraMatrix = makePointAtMatrix(camera.pos, targetVector, upVector);
+    viewMatrix = quickInvertMatrix(cameraMatrix);
+
     // Perspective
     q = farClipPlane/(farClipPlane-nearClipPlane);
     perspective.mat[0][0] = aspectRatio*FOVRad;
@@ -72,7 +76,6 @@ void Engine::updateMatricies(SceneObject obj) {
 void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     Tri3D projected, transformed;
     
-    
     updateMatricies(obj);
 
     transformed = tri;
@@ -80,35 +83,8 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     transformed *= yRotMat;
     transformed *= zRotMat;
     transformed *= translationOffsetMatrix;
+    transformed *= viewMatrix;
 
-    /*
-    // X Rotation
-    multiplyMatrix4x4(xRotMat, tri.vecs[0], xRotated.vecs[0]);
-    multiplyMatrix4x4(xRotMat, tri.vecs[1], xRotated.vecs[1]);
-    multiplyMatrix4x4(xRotMat, tri.vecs[2], xRotated.vecs[2]);
-
-    // Y Rotation
-    multiplyMatrix4x4(yRotMat, xRotated.vecs[0], yRotated.vecs[0]);
-    multiplyMatrix4x4(yRotMat, xRotated.vecs[1], yRotated.vecs[1]);
-    multiplyMatrix4x4(yRotMat, xRotated.vecs[2], yRotated.vecs[2]);
-
-    // Z Rotated
-    multiplyMatrix4x4(zRotMat, yRotated.vecs[0], zRotated.vecs[0]);
-    multiplyMatrix4x4(zRotMat, yRotated.vecs[1], zRotated.vecs[1]);
-    multiplyMatrix4x4(zRotMat, yRotated.vecs[2], zRotated.vecs[2]);
-
-    // Translate
-    
-    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[0], translated.vecs[0]);
-    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[1], translated.vecs[1]);
-    multiplyMatrix4x4(translationOffsetMatrix, zRotated.vecs[2], translated.vecs[2]);
-    */
-    // Projection
-    /*
-    multiplyMatrix4x4(matrix, transformed.vecs[0], projected.vecs[0]);
-    multiplyMatrix4x4(matrix, transformed.vecs[1], projected.vecs[1]);
-    multiplyMatrix4x4(matrix, transformed.vecs[2], projected.vecs[2]);
-    */
     projected = transformed;
     projected *= matrix; 
 
@@ -122,29 +98,6 @@ void Engine::drawTriangle3D(Mat4x4 matrix, Tri3D tri, SceneObject obj) {
     projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
     projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
     projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
-
-    // Scale into view for perspective
-    /*
-    projected.vecs[0].x += 1.0f; projected.vecs[0].y += 1.0f;
-    projected.vecs[1].x += 1.0f; projected.vecs[1].y += 1.0f;
-    projected.vecs[2].x += 1.0f; projected.vecs[2].y += 1.0f;
-    
-    projected.vecs[0].x *= width * 0.5f; projected.vecs[0].y *= height * 0.5f;
-    projected.vecs[1].x *= width * 0.5f; projected.vecs[1].y *= height * 0.5f;
-    projected.vecs[2].x *= width * 0.5f; projected.vecs[2].y *= height * 0.5f;
-    */
-
-    //Scale into view for simple projection
-    /*
-    projected.vecs[0].x *= height/10; projected.vecs[0].y *= height/10;
-    projected.vecs[1].x *= height/10; projected.vecs[1].y *= height/10;
-    projected.vecs[2].x *= height/10; projected.vecs[2].y *= height/10;
-
-    projected.vecs[0].x += width/2; projected.vecs[0].y += height/2;
-    projected.vecs[1].x += width/2; projected.vecs[1].y += height/2;
-    projected.vecs[2].x += width/2; projected.vecs[2].y += height/2;
-    */
-    
 
     drawTriangle2D(
         projected.vecs[0].x, projected.vecs[0].y,
@@ -178,39 +131,6 @@ void Engine::drawObject(Mat4x4 matrix, SceneObject obj) {
     }
 }
 
-/*
-void Engine::calculateNormalVector(Tri3D tri, Vec3D &out) {
-    Vec3D U, V;
-
-    // Subtract Vectors
-    U.x = tri.vecs[1].x - tri.vecs[0].x;
-    U.y = tri.vecs[1].y - tri.vecs[0].y;
-    U.z = tri.vecs[1].z - tri.vecs[0].z;
-
-    V.x = tri.vecs[2].x - tri.vecs[0].x;
-    V.y = tri.vecs[2].y - tri.vecs[0].y;
-    V.z = tri.vecs[2].z - tri.vecs[0].z;
-
-    // Cross Product
-    out.x = U.y * V.z - U.z * V.y;
-    out.y = U.z * V.x - U.x * V.y;
-    out.z = U.x * V.y - U.y * V.x;
-}
-
-void Engine::multiplyMatrix4x4(Mat4x4 matrix, Vec3D in, Vec3D &out) {
-    out.x = matrix.mat[0][0] * in.x + matrix.mat[1][0] * in.y + matrix.mat[2][0] * in.z + matrix.mat[3][0];
-    out.y = matrix.mat[0][1] * in.x + matrix.mat[1][1] * in.y + matrix.mat[2][1] * in.z + matrix.mat[3][1];
-    out.z = matrix.mat[0][2] * in.x + matrix.mat[1][2] * in.y + matrix.mat[2][2] * in.z + matrix.mat[3][2];
-    float w = matrix.mat[0][3] * in.x + matrix.mat[1][3] * in.y + matrix.mat[2][3] * in.z + matrix.mat[3][3];
-
-    if (w != 0.0f) {
-        out.x /= w;
-        out.y /= w;
-        out.z /= w;
-    }
-}
-*/
-
 Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
     Vec3D newForward = target - pos;
     newForward.normalize();
@@ -219,7 +139,10 @@ Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
     Vec3D a = newForward * dotProduct;
     Vec3D newUp = up - a;
     newUp.normalize();
-
+    //std::cout << newUp.y << std::endl;
+    //std::cout.flush();
+    
+    // std cout med flush förstör framRaten ...
     Vec3D newRight = newUp.cross(newForward);
 
     Mat4x4 newMat;
@@ -228,4 +151,16 @@ Mat4x4 Engine::makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up) {
     newMat.mat[2][0] = newForward.x;     newMat.mat[2][1] = newForward.y;     newMat.mat[2][2] = newForward.z;    newMat.mat[2][3] = 0.0f;
     newMat.mat[3][0] = pos.x;            newMat.mat[3][1] = pos.y;            newMat.mat[3][2] = pos.z;           newMat.mat[3][3] = 1.0f;
     return newMat;
+}
+
+Mat4x4 Engine::quickInvertMatrix(Mat4x4 m) {
+    Mat4x4 matrix;
+    matrix.mat[0][0] = m.mat[0][0]; matrix.mat[0][1] = m.mat[1][0]; matrix.mat[0][2] = m.mat[2][0]; matrix.mat[0][3] = 0.0f;
+    matrix.mat[1][0] = m.mat[0][1]; matrix.mat[1][1] = m.mat[1][1]; matrix.mat[1][2] = m.mat[2][1]; matrix.mat[1][3] = 0.0f;
+    matrix.mat[2][0] = m.mat[0][2]; matrix.mat[2][1] = m.mat[1][2]; matrix.mat[2][2] = m.mat[2][2]; matrix.mat[2][3] = 0.0f;
+    matrix.mat[3][0] = -(m.mat[3][0] * matrix.mat[0][0] + m.mat[3][1] * matrix.mat[1][0] + m.mat[3][2] * matrix.mat[2][0]);
+    matrix.mat[3][1] = -(m.mat[3][0] * matrix.mat[0][1] + m.mat[3][1] * matrix.mat[1][1] + m.mat[3][2] * matrix.mat[2][1]);
+    matrix.mat[3][2] = -(m.mat[3][0] * matrix.mat[0][2] + m.mat[3][1] * matrix.mat[1][2] + m.mat[3][2] * matrix.mat[2][2]);
+    matrix.mat[3][3] = 1.0f;
+    return matrix;
 }

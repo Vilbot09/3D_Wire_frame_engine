@@ -20,11 +20,13 @@ struct Vec3D {
     };
 
     Vec3D() {
-        x = y = z = 0;
+        x = y = z = 0.0f;
+        w = 1.0f;
     }
 
     Vec3D(float a, float b, float c) {
         x = a; y = b; z = c;
+        w = 1.0f;
     }
 
     float length() {
@@ -126,14 +128,23 @@ struct Vec3D {
     }
 
     Vec3D operator-(const Vec3D& p) {
-        Vec3D newPoint;
+        Vec3D newPoint = Vec3D(this->x, this->y, this->z);
+        newPoint.w = this->w;
         newPoint -= p;
         return newPoint;
     }
 
     Vec3D operator*(const float& f) {
-        Vec3D newPoint;
+        Vec3D newPoint = Vec3D(this->x, this->y, this->z);
+        newPoint.w = this->w;
         newPoint *= f;
+        return newPoint;
+    }
+
+    Vec3D operator+(const Vec3D& f) {
+        Vec3D newPoint = Vec3D(this->x, this->y, this->z);
+        newPoint.w = this->w;
+        newPoint += f;
         return newPoint;
     }
 };

@@ -3,6 +3,7 @@
 #include "headers/mesh.h"
 #include "raylib/raylib.h"
 #include "headers/sceneObject.h"
+#include "headers/cameraObject.h"
 #include <cmath>
 
 class Engine {
@@ -20,6 +21,13 @@ public:
 
     // Translation Matrix
     Mat4x4 translationOffsetMatrix;
+
+    CameraObject camera;
+    Vec3D upVector = Vec3D(0, 1, 0);
+    Vec3D targetVector = Vec3D(0, 0, 1);
+    // Then multiply targetVector with fYaw
+    Mat4x4 cameraMatrix = makePointAtMatrix(camera.pos, targetVector, upVector);
+    Mat4x4 viewMatrix = quickInvertMatrix(cameraMatrix);
 
 
     int width = 1000;
@@ -43,4 +51,5 @@ public:
     void updateMatricies(SceneObject obj);
 
     Mat4x4 makePointAtMatrix(Vec3D& pos, Vec3D& target, Vec3D& up);
+    Mat4x4 quickInvertMatrix(Mat4x4 m);
 };
