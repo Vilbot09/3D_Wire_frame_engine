@@ -1,6 +1,5 @@
 #include "headers/engine.h"
 #include "headers/sceneObject.h"
-#include "headers/presets.h"
 #include "headers/mesh.h"
 #include "headers/cameraObject.h"
 #include <iostream>
@@ -9,16 +8,19 @@ SceneObject floorPlane;
 SceneObject ship;
 
 
-void inputHandler(CameraObject &camera) {
-    if (IsKeyDown(KEY_RIGHT)) camera.yaw -= 0.01f;
-    if (IsKeyDown(KEY_LEFT)) camera.yaw += 0.01f;
+void inputHandler(Engine engine, CameraObject &camera) {
+    if (IsKeyDown(KEY_RIGHT)) camera.yaw -= camera.fYawSpeed;
+    if (IsKeyDown(KEY_LEFT)) camera.yaw += camera.fYawSpeed;
+    if (IsKeyDown(KEY_UP)) camera.pitch -= camera.fPitchSpeed;
+    if (IsKeyDown(KEY_DOWN)) camera.pitch += camera.fPitchSpeed;
 
-    Vec3D fowardVector = camera.lookDir * 0.2f;
+    Vec3D forwardVector = camera.lookDir * camera.fSpeed;
+    Vec3D rightVector = engine.upVector.Product_Cross(camera.lookDir) * camera.fSpeed;
 
-    if (IsKeyDown(KEY_W)) camera.pos += fowardVector;
-    if (IsKeyDown(KEY_S)) camera.pos -= fowardVector; 
-    //if (IsKeyDown(KEY_D)) camera.pos.x += 0.20f;
-    //if (IsKeyDown(KEY_A)) camera.pos.x -= 0.20f;
+    if (IsKeyDown(KEY_W)) camera.pos += forwardVector;
+    if (IsKeyDown(KEY_S)) camera.pos -= forwardVector; 
+    if (IsKeyDown(KEY_D)) camera.pos += rightVector;
+    if (IsKeyDown(KEY_A)) camera.pos -= rightVector;
 
 
 
@@ -51,8 +53,8 @@ int main(void)  {
     //Class Instance
     Engine engine;
 
-    ship.loadMeshFromObjectFile("../meshes/ship.obj");
-    floorPlane.loadMeshFromObjectFile("../meshes/plane.obj");
+    ship.LoadMeshFromObjectFile("../meshes/ship.obj");
+    floorPlane.LoadMeshFromObjectFile("../meshes/plane.obj");
 
     floorPlane.pos.z = 15.0f;
     floorPlane.pos.y = 6;
@@ -67,13 +69,13 @@ int main(void)  {
         
         ship.rot.y += 0.01f;
 
-        inputHandler(engine.camera);
+        inputHandler(engine, engine.camera);
 
         BeginDrawing();
             ClearBackground(BLACK);
             
-            engine.drawObject(ship);
-            engine.drawObject(floorPlane);
+            engine.Render_SceneObject(ship);
+            engine.Render_SceneObject(floorPlane);
         EndDrawing();
     }
 

@@ -9,6 +9,7 @@ include_directories(
 )
 
 file(GLOB SOURCES "src/*.cpp")
+message(STATUS "Sources: ${SOURCES}")
 
 if (WIN32) 
     message(STATUS "Creating cmake files for windows!")

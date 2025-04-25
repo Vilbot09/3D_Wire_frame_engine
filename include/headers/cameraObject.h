@@ -7,10 +7,16 @@ class CameraObject {
 public:
     Vec3D pos;
     Vec3D lookDir;
+
     float yaw;
+    float pitch;
 
     int width;
     int height;
+
+    float fSpeed;
+    float fPitchSpeed;
+    float fYawSpeed;
 
     float fAspectRatio;
     float fFov;
@@ -19,7 +25,12 @@ public:
     float fFar;
 
     CameraObject() {
+        fSpeed = 0.3f;
+        fYawSpeed = 0.04f;
+        fPitchSpeed = 0.03f;
+
         yaw = 0.0f;
+        pitch = 0.0f;
         lookDir = Vec3D(0, 0, 1);
 
         width = 1000;

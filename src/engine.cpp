@@ -19,11 +19,16 @@ Engine::Engine() {
     UnloadImage(icon);
 }
 
-void Engine::drawTriangle3D(Tri3D tri, SceneObject obj) {
-    Vec3D upVector = Vec3D(0, 1, 0);
-    Vec3D targetVector = Vec3D(0, 0, 1);
-    Mat4x4 camRotMat = Matrix_RotationY(camera.yaw);
-    camera.lookDir = targetVector * camRotMat;
+void Engine::Render_Triangle3D(Tri3D tri, SceneObject obj) {
+    upVector = Vec3D(0, 1, 0); 
+    targetVector = Vec3D(0, 0, 1); // Reset up and targetVector each frame
+    Mat4x4 camRotMatY = Matrix_RotationY(camera.yaw);
+    Mat4x4 camRotMatX = Matrix_RotationX(camera.pitch);
+
+    Vec3D lookDir = targetVector * camRotMatX;
+    lookDir *= camRotMatY;
+
+    camera.lookDir = lookDir;
     targetVector = camera.pos + camera.lookDir;
 
     Tri3D newTri;
@@ -47,7 +52,7 @@ void Engine::drawTriangle3D(Tri3D tri, SceneObject obj) {
     newTri.vecs[1].x *= camera.width * 0.5f; newTri.vecs[1].y *= camera.height * 0.5f;
     newTri.vecs[2].x *= camera.width * 0.5f; newTri.vecs[2].y *= camera.height * 0.5f;
 
-    drawTriangle2D(
+    Render_Triangle2D(
         newTri.vecs[0].x, newTri.vecs[0].y,
         newTri.vecs[1].x, newTri.vecs[1].y,
         newTri.vecs[2].x, newTri.vecs[2].y
@@ -55,7 +60,7 @@ void Engine::drawTriangle3D(Tri3D tri, SceneObject obj) {
     
 }
 
-void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
+void Engine::Render_Triangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     DrawLine(x1, y1, x2, y2, WHITE);
     DrawLine(x2, y2, x3, y3, WHITE);
     DrawLine(x3, y3, x1, y1, WHITE);
@@ -73,9 +78,9 @@ void Engine::drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
     //DrawCircle(x3, y3, 4, BLUE);
 }
 
-void Engine::drawObject(SceneObject obj) {
+void Engine::Render_SceneObject(SceneObject obj) {
     for (const auto& tri : obj.mesh.tris) {
-        drawTriangle3D(tri, obj);
+        Render_Triangle3D(tri, obj);
     }
 }
 
@@ -136,17 +141,17 @@ Mat4x4 Engine::Matrix_Projection(CameraObject camera) {
 
 Mat4x4 Engine::Matrix_PointAt(Vec3D pos, Vec3D target, Vec3D up) {
     Vec3D newForward = target - pos;
-    newForward.normalize();
+    newForward.Normalize();
 
-    float dotProduct = up.dot(newForward);
+    float dotProduct = up.Product_Dot(newForward);
     Vec3D a = newForward * dotProduct;
     Vec3D newUp = up - a;
-    newUp.normalize();
+    newUp.Normalize();
     //std::cout << newUp.y << std::endl;
     //std::cout.flush();
     
     // std cout med flush förstör framRaten ...
-    Vec3D newRight = newUp.cross(newForward);
+    Vec3D newRight = newUp.Product_Cross(newForward);
 
     Mat4x4 newMat;
     newMat.mat[0][0] = newRight.x;       newMat.mat[0][1] = newRight.y;       newMat.mat[0][2] = newRight.z;      newMat.mat[0][3] = 0.0f;

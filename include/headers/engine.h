@@ -7,15 +7,17 @@
 #include <cmath>
 
 class Engine {
-
 public:
+    Vec3D upVector;
+    Vec3D targetVector;
+
     CameraObject camera;
 
     Engine();
     
-    void drawTriangle3D(Tri3D tri, SceneObject obj);
-    void drawTriangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
-    void drawObject(SceneObject obj);
+    void Render_Triangle3D(Tri3D tri, SceneObject obj);
+    void Render_Triangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
+    void Render_SceneObject(SceneObject obj);
 
     Mat4x4 Matrix_RotationX(float);
     Mat4x4 Matrix_RotationY(float);

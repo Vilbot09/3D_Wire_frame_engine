@@ -13,7 +13,7 @@ public:
         pos.x = 0.0f; pos.y = 0.0f; pos.z = 0.0f;
     }
 
-    void loadMeshFromObjectFile(std::string filename) {
+    void LoadMeshFromObjectFile(std::string filename) {
         mesh.LoadFromObjectFile(filename);
     }
 };
