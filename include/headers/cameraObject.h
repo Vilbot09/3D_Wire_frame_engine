@@ -1,18 +1,16 @@
 #pragma once
 
+#include "raylib/raylib.h"
 #include "headers/mesh.h"
 #include <cmath>
 
 class CameraObject {
 public:
-    Vec3D pos;
-    Vec3D lookDir;
+    Vec3D vPos;
+    Vec3D vLookDir;
 
-    float yaw;
-    float pitch;
-
-    int width;
-    int height;
+    float fYaw;
+    float fPitch;
 
     float fSpeed;
     float fPitchSpeed;
@@ -29,17 +27,17 @@ public:
         fYawSpeed = 0.04f;
         fPitchSpeed = 0.03f;
 
-        yaw = 0.0f;
-        pitch = 0.0f;
-        lookDir = Vec3D(0, 0, 1);
+        fYaw = 0.0f;
+        fPitch = 0.0f;
+        vLookDir = Vec3D(0, 0, 1);
 
-        width = 1000;
-        height = 700;
-
-        fAspectRatio = (float)height/(float)width;
+        fAspectRatio = (float)Get_Height()/(float)Get_Width();
         fFov = 70.0f;
         fFovRad = 1.0f / std::tan(fFov * 0.5f / 180.0f * 3.141592f);
         fNear = 0.1f;
         fFar = 1000.0f;
     }
+
+    int Get_Width() {return GetScreenWidth();}
+    int Get_Height() {return GetScreenHeight();}
 };

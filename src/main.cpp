@@ -9,30 +9,30 @@ SceneObject ship;
 
 
 void inputHandler(Engine engine, CameraObject &camera) {
-    if (IsKeyDown(KEY_RIGHT)) camera.yaw -= camera.fYawSpeed;
-    if (IsKeyDown(KEY_LEFT)) camera.yaw += camera.fYawSpeed;
-    if (IsKeyDown(KEY_UP)) camera.pitch -= camera.fPitchSpeed;
-    if (IsKeyDown(KEY_DOWN)) camera.pitch += camera.fPitchSpeed;
+    if (IsKeyDown(KEY_RIGHT)) camera.fYaw -= camera.fYawSpeed;
+    if (IsKeyDown(KEY_LEFT)) camera.fYaw += camera.fYawSpeed;
+    if (IsKeyDown(KEY_UP)) camera.fPitch -= camera.fPitchSpeed;
+    if (IsKeyDown(KEY_DOWN)) camera.fPitch += camera.fPitchSpeed;
 
-    Vec3D forwardVector = camera.lookDir * camera.fSpeed;
-    Vec3D rightVector = engine.upVector.Product_Cross(camera.lookDir) * camera.fSpeed;
+    Vec3D forwardVector = camera.vLookDir * camera.fSpeed;
+    Vec3D rightVector = engine.vUp.Product_Cross(camera.vLookDir) * camera.fSpeed;
 
-    if (IsKeyDown(KEY_W)) camera.pos += forwardVector;
-    if (IsKeyDown(KEY_S)) camera.pos -= forwardVector; 
-    if (IsKeyDown(KEY_D)) camera.pos += rightVector;
-    if (IsKeyDown(KEY_A)) camera.pos -= rightVector;
+    if (IsKeyDown(KEY_W)) camera.vPos += forwardVector;
+    if (IsKeyDown(KEY_S)) camera.vPos -= forwardVector; 
+    if (IsKeyDown(KEY_D)) camera.vPos += rightVector;
+    if (IsKeyDown(KEY_A)) camera.vPos -= rightVector;
 
 
 
     /*
-    if (IsKeyDown(KEY_UP)) ship.rot.x += 0.015f;
-    if (IsKeyDown(KEY_DOWN)) ship.rot.x -= 0.015f;
-    if (IsKeyDown(KEY_LEFT)) ship.rot.z += 0.015f;
-    if (IsKeyDown(KEY_RIGHT)) ship.rot.z -= 0.015f;
+    if (IsKeyDown(KEY_UP)) ship.vRot.x += 0.015f;
+    if (IsKeyDown(KEY_DOWN)) ship.vRot.x -= 0.015f;
+    if (IsKeyDown(KEY_LEFT)) ship.vRot.z += 0.015f;
+    if (IsKeyDown(KEY_RIGHT)) ship.vRot.z -= 0.015f;
     */
 
-    if (IsKeyDown(KEY_LEFT_SHIFT)) camera.pos.y += 0.20f;
-    if (IsKeyDown(KEY_SPACE)) camera.pos.y -= 0.20f;
+    if (IsKeyDown(KEY_LEFT_SHIFT)) camera.vPos.y += 0.20f;
+    if (IsKeyDown(KEY_SPACE)) camera.vPos.y -= 0.20f;
     
 
     if (IsKeyPressed(KEY_F11)) {
@@ -56,18 +56,16 @@ int main(void)  {
     ship.LoadMeshFromObjectFile("../meshes/ship.obj");
     floorPlane.LoadMeshFromObjectFile("../meshes/plane.obj");
 
-    floorPlane.pos.z = 15.0f;
-    floorPlane.pos.y = 6;
-    ship.pos.z = 15.0f;
-    ship.pos.y = 3.0f;
+    floorPlane.vPos.z = 15.0f;
+    floorPlane.vPos.y = 6;
+    ship.vPos.z = 15.0f;
+    ship.vPos.y = 3.0f;
     
 
     while (!WindowShouldClose()) {
-        engine.camera.width = GetScreenWidth();
-        engine.camera.height = GetScreenHeight();
-        engine.camera.fAspectRatio = (float)engine.camera.height/(float)engine.camera.width;
+        engine.camera.fAspectRatio = (float)engine.camera.Get_Height()/(float)engine.camera.Get_Width();
         
-        ship.rot.y += 0.01f;
+        ship.vRot.y += 0.01f;
 
         inputHandler(engine, engine.camera);
 

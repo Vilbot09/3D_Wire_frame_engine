@@ -4,13 +4,13 @@
 
 class SceneObject {
 public:
-    Vec3D pos;
-    Vec3D rot;
+    Vec3D vPos;
+    Vec3D vRot;
 
     Mesh3D mesh;
 
     SceneObject() {
-        pos.x = 0.0f; pos.y = 0.0f; pos.z = 0.0f;
+        vPos.x = 0.0f; vPos.y = 0.0f; vPos.z = 0.0f;
     }
 
     void LoadMeshFromObjectFile(std::string filename) {

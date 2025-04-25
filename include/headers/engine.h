@@ -8,16 +8,16 @@
 
 class Engine {
 public:
-    Vec3D upVector;
-    Vec3D targetVector;
+    Vec3D vUp;
+    Vec3D vTarget;
 
     CameraObject camera;
 
     Engine();
     
-    void Render_Triangle3D(Tri3D tri, SceneObject obj);
-    void Render_Triangle2D(int x1, int y1, int x2, int y2, int x3, int y3);
-    void Render_SceneObject(SceneObject obj);
+    void Render_Triangle3D(Tri3D, SceneObject);
+    void Render_Triangle2D(int, int, int, int, int, int);
+    void Render_SceneObject(SceneObject);
 
     Mat4x4 Matrix_RotationX(float);
     Mat4x4 Matrix_RotationY(float);

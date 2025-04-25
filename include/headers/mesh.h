@@ -13,40 +13,40 @@ struct Vec3D {
     };
 
     Vec3D();
-    Vec3D(float a, float b, float c);
+    Vec3D(float, float, float);
 
     float Get_Length() const;
-    float Product_Dot(const Vec3D& p) const;
-    Vec3D Product_Cross(const Vec3D& p) const;
+    float Product_Dot(const Vec3D&) const;
+    Vec3D Product_Cross(const Vec3D&) const;
     Vec3D& Normalize();
     
-    Vec3D& operator+=(const Vec3D& p);
-    Vec3D& operator-=(const Vec3D& p);
-    Vec3D& operator*=(const Vec3D& p);
-    Vec3D& operator/=(const Vec3D& p);
+    Vec3D& operator+=(const Vec3D&);
+    Vec3D& operator-=(const Vec3D&);
+    Vec3D& operator*=(const Vec3D&);
+    Vec3D& operator/=(const Vec3D&);
 
-    Vec3D& operator+=(const float& f);
-    Vec3D& operator-=(const float& f);
-    Vec3D& operator*=(const float& f);
-    Vec3D& operator/=(const float& f);
+    Vec3D& operator+=(const float&);
+    Vec3D& operator-=(const float&);
+    Vec3D& operator*=(const float&);
+    Vec3D& operator/=(const float&);
 
-    Vec3D& operator*=(const Mat4x4& m);
+    Vec3D& operator*=(const Mat4x4&);
 
-    Vec3D operator-(const Vec3D& p) const;
-    Vec3D operator+(const Vec3D& f) const;
-    Vec3D operator*(const float& f) const;
-    Vec3D operator*(const Mat4x4& m) const;
+    Vec3D operator-(const Vec3D&) const;
+    Vec3D operator+(const Vec3D&) const;
+    Vec3D operator*(const float&) const;
+    Vec3D operator*(const Mat4x4&) const;
 };
 
 struct Tri3D {
     Vec3D vecs[3];
 
-    Tri3D& operator*=(const Mat4x4& m);
-    Tri3D& operator+=(const float& f);
+    Tri3D& operator*=(const Mat4x4&);
+    Tri3D& operator+=(const float&);
 };
 
 struct Mesh3D {
     std::vector<Tri3D> tris;
 
-    bool LoadFromObjectFile(std::string filename);
+    bool LoadFromObjectFile(std::string);
 };

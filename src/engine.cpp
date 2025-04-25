@@ -20,25 +20,25 @@ Engine::Engine() {
 }
 
 void Engine::Render_Triangle3D(Tri3D tri, SceneObject obj) {
-    upVector = Vec3D(0, 1, 0); 
-    targetVector = Vec3D(0, 0, 1); // Reset up and targetVector each frame
-    Mat4x4 camRotMatY = Matrix_RotationY(camera.yaw);
-    Mat4x4 camRotMatX = Matrix_RotationX(camera.pitch);
+    vUp = Vec3D(0, 1, 0); 
+    vTarget = Vec3D(0, 0, 1); // Reset up and vTarget each frame
+    Mat4x4 camRotMatY = Matrix_RotationY(camera.fYaw);
+    Mat4x4 camRotMatX = Matrix_RotationX(camera.fPitch);
 
-    Vec3D lookDir = targetVector * camRotMatX;
-    lookDir *= camRotMatY;
+    Vec3D vLookDir = vTarget * camRotMatX;
+    vLookDir *= camRotMatY;
 
-    camera.lookDir = lookDir;
-    targetVector = camera.pos + camera.lookDir;
+    camera.vLookDir = vLookDir;
+    vTarget = camera.vPos + camera.vLookDir;
 
     Tri3D newTri;
     newTri = tri;
 
-    newTri *= Matrix_RotationX(obj.rot.x);
-    newTri *= Matrix_RotationY(obj.rot.y);
-    newTri *= Matrix_RotationZ(obj.rot.z);
-    newTri *= Matrix_Translation(obj.pos.x, obj.pos.y, obj.pos.z);
-    newTri *= Matrix_QuickInvert(Matrix_PointAt(camera.pos, targetVector, upVector));
+    newTri *= Matrix_RotationX(obj.vRot.x);
+    newTri *= Matrix_RotationY(obj.vRot.y);
+    newTri *= Matrix_RotationZ(obj.vRot.z);
+    newTri *= Matrix_Translation(obj.vPos.x, obj.vPos.y, obj.vPos.z);
+    newTri *= Matrix_QuickInvert(Matrix_PointAt(camera.vPos, vTarget, vUp));
     newTri *= Matrix_Projection(camera); 
 
     // Divide by W
@@ -48,9 +48,9 @@ void Engine::Render_Triangle3D(Tri3D tri, SceneObject obj) {
 
     // Scale into view
     newTri += 1.0f;
-    newTri.vecs[0].x *= camera.width * 0.5f; newTri.vecs[0].y *= camera.height * 0.5f;
-    newTri.vecs[1].x *= camera.width * 0.5f; newTri.vecs[1].y *= camera.height * 0.5f;
-    newTri.vecs[2].x *= camera.width * 0.5f; newTri.vecs[2].y *= camera.height * 0.5f;
+    newTri.vecs[0].x *= camera.Get_Width() * 0.5f; newTri.vecs[0].y *= camera.Get_Height() * 0.5f;
+    newTri.vecs[1].x *= camera.Get_Width() * 0.5f; newTri.vecs[1].y *= camera.Get_Height() * 0.5f;
+    newTri.vecs[2].x *= camera.Get_Width() * 0.5f; newTri.vecs[2].y *= camera.Get_Height() * 0.5f;
 
     Render_Triangle2D(
         newTri.vecs[0].x, newTri.vecs[0].y,
@@ -139,8 +139,8 @@ Mat4x4 Engine::Matrix_Projection(CameraObject camera) {
     return matrix;
 }
 
-Mat4x4 Engine::Matrix_PointAt(Vec3D pos, Vec3D target, Vec3D up) {
-    Vec3D newForward = target - pos;
+Mat4x4 Engine::Matrix_PointAt(Vec3D vPos, Vec3D target, Vec3D up) {
+    Vec3D newForward = target - vPos;
     newForward.Normalize();
 
     float dotProduct = up.Product_Dot(newForward);
@@ -157,7 +157,7 @@ Mat4x4 Engine::Matrix_PointAt(Vec3D pos, Vec3D target, Vec3D up) {
     newMat.mat[0][0] = newRight.x;       newMat.mat[0][1] = newRight.y;       newMat.mat[0][2] = newRight.z;      newMat.mat[0][3] = 0.0f;
     newMat.mat[1][0] = newUp.x;          newMat.mat[1][1] = newUp.y;          newMat.mat[1][2] = newUp.z;         newMat.mat[1][3] = 0.0f;
     newMat.mat[2][0] = newForward.x;     newMat.mat[2][1] = newForward.y;     newMat.mat[2][2] = newForward.z;    newMat.mat[2][3] = 0.0f;
-    newMat.mat[3][0] = pos.x;            newMat.mat[3][1] = pos.y;            newMat.mat[3][2] = pos.z;           newMat.mat[3][3] = 1.0f;
+    newMat.mat[3][0] = vPos.x;            newMat.mat[3][1] = vPos.y;            newMat.mat[3][2] = vPos.z;           newMat.mat[3][3] = 1.0f;
     return newMat;
 }
 
