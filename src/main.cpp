@@ -2,13 +2,32 @@
 #include "headers/sceneObject.h"
 #include "headers/mesh.h"
 #include "headers/cameraObject.h"
+#include "raylib/raylib.h"
 #include <iostream>
 
 SceneObject floorPlane;
 SceneObject ship;
 
+bool mouseHidden = false;
 
 void inputHandler(Engine engine, CameraObject &camera) {
+
+    Vector2 delta = GetMouseDelta();
+
+    camera.fYaw -= delta.x * 0.003f;
+    camera.fPitch += delta.y * 0.003f;
+
+    if (IsKeyPressed(KEY_H)) {
+        if (!mouseHidden) {
+            mouseHidden = true;
+            DisableCursor();
+        }
+        else if (mouseHidden) {
+            mouseHidden = false;
+            EnableCursor();
+        }
+    }
+
     if (IsKeyDown(KEY_RIGHT)) camera.fYaw -= camera.fYawSpeed;
     if (IsKeyDown(KEY_LEFT)) camera.fYaw += camera.fYawSpeed;
     if (IsKeyDown(KEY_UP)) camera.fPitch -= camera.fPitchSpeed;

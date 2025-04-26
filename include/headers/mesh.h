@@ -19,6 +19,7 @@ struct Vec3D {
     float Product_Dot(const Vec3D&) const;
     Vec3D Product_Cross(const Vec3D&) const;
     Vec3D& Normalize();
+    Vec3D Intersection_Plane(Vec3D&, Vec3D&, Vec3D&);
     
     Vec3D& operator+=(const Vec3D&);
     Vec3D& operator-=(const Vec3D&);
@@ -40,6 +41,8 @@ struct Vec3D {
 
 struct Tri3D {
     Vec3D vecs[3];
+
+    int ClipAgainstPlane(Vec3D, Vec3D, Tri3D&, Tri3D&);
 
     Tri3D& operator*=(const Mat4x4&);
     Tri3D& operator+=(const float&);

@@ -39,25 +39,33 @@ void Engine::Render_Triangle3D(Tri3D tri, SceneObject obj) {
     newTri *= Matrix_RotationZ(obj.vRot.z);
     newTri *= Matrix_Translation(obj.vPos.x, obj.vPos.y, obj.vPos.z);
     newTri *= Matrix_QuickInvert(Matrix_PointAt(camera.vPos, vTarget, vUp));
-    newTri *= Matrix_Projection(camera); 
 
-    // Divide by W
-    newTri.vecs[0] /= newTri.vecs[0].w;
-    newTri.vecs[1] /= newTri.vecs[1].w;
-    newTri.vecs[2] /= newTri.vecs[2].w;
+    // Clipping
+    int nClippedTriangles = 0;
+    Tri3D clipped[2];
+    nClippedTriangles = newTri.ClipAgainstPlane({ 0.0f, 0.0f, 0.1f }, { 0.0f, 0.0f, 1.0f }, clipped[0], clipped[1]);
 
-    // Scale into view
-    newTri += 1.0f;
-    newTri.vecs[0].x *= camera.Get_Width() * 0.5f; newTri.vecs[0].y *= camera.Get_Height() * 0.5f;
-    newTri.vecs[1].x *= camera.Get_Width() * 0.5f; newTri.vecs[1].y *= camera.Get_Height() * 0.5f;
-    newTri.vecs[2].x *= camera.Get_Width() * 0.5f; newTri.vecs[2].y *= camera.Get_Height() * 0.5f;
+    // Projecting the clipped triangles
+    for (int n = 0; n < nClippedTriangles; n++) {
+        clipped[n] *= Matrix_Projection(camera); 
 
-    Render_Triangle2D(
-        newTri.vecs[0].x, newTri.vecs[0].y,
-        newTri.vecs[1].x, newTri.vecs[1].y,
-        newTri.vecs[2].x, newTri.vecs[2].y
-    );
+        // Divide by W
+        clipped[n].vecs[0] /= clipped[n].vecs[0].w;
+        clipped[n].vecs[1] /= clipped[n].vecs[1].w;
+        clipped[n].vecs[2] /= clipped[n].vecs[2].w;
     
+        // Scale into view
+        clipped[n] += 1.0f;
+        clipped[n].vecs[0].x *= camera.Get_Width() * 0.5f; clipped[n].vecs[0].y *= camera.Get_Height() * 0.5f;
+        clipped[n].vecs[1].x *= camera.Get_Width() * 0.5f; clipped[n].vecs[1].y *= camera.Get_Height() * 0.5f;
+        clipped[n].vecs[2].x *= camera.Get_Width() * 0.5f; clipped[n].vecs[2].y *= camera.Get_Height() * 0.5f;
+    
+        Render_Triangle2D(
+            clipped[n].vecs[0].x, clipped[n].vecs[0].y,
+            clipped[n].vecs[1].x, clipped[n].vecs[1].y,
+            clipped[n].vecs[2].x, clipped[n].vecs[2].y
+        );
+    }
 }
 
 void Engine::Render_Triangle2D(int x1, int y1, int x2, int y2, int x3, int y3) {
