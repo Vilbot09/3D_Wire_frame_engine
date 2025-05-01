@@ -1,5 +1,6 @@
 {
     "files.associations": {
+        "*.ejs": "html",
         "array": "cpp",
         "atomic": "cpp",
         "bit": "cpp",
@@ -45,7 +46,16 @@
         "streambuf": "cpp",
         "typeinfo": "cpp",
         "fstream": "cpp",
-        "strstream": "cpp"
+        "strstream": "cpp",
+        "charconv": "cpp",
+        "ctime": "cpp",
+        "optional": "cpp",
+        "format": "cpp",
+        "ranges": "cpp",
+        "span": "cpp",
+        "text_encoding": "cpp",
+        "cinttypes": "cpp",
+        "variant": "cpp"
     },
     "C_Cpp.errorSquiggles": "disabled"
 }
