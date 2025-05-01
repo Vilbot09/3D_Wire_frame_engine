@@ -103,9 +103,11 @@ Vec3D& Vec3D::operator*=(const float& f) {
 }
 
 Vec3D& Vec3D::operator/=(const float& f) {
+
     this->x /= f;
     this->y /= f;
     this->z /= f;
+
     return *this;
 }
 
@@ -248,6 +250,8 @@ int Tri3D::ClipAgainstPlane(Vec3D plane_p, Vec3D plane_n, Tri3D& out_tri1, Tri3D
 
         return 2; // Two valid triangles
 	}
+
+    return 0;
 }
 
 Tri3D& Tri3D::operator*=(const Mat4x4& m) {

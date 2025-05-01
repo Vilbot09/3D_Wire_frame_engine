@@ -201,6 +201,54 @@ src/mesh.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/mesh.cpp.s
 .PHONY : src/mesh.cpp.s
 
+src/phdr.o: src/phdr.cpp.o
+.PHONY : src/phdr.o
+
+# target to build an object file
+src/phdr.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/phdr.cpp.o
+.PHONY : src/phdr.cpp.o
+
+src/phdr.i: src/phdr.cpp.i
+.PHONY : src/phdr.i
+
+# target to preprocess a source file
+src/phdr.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/phdr.cpp.i
+.PHONY : src/phdr.cpp.i
+
+src/phdr.s: src/phdr.cpp.s
+.PHONY : src/phdr.s
+
+# target to generate assembly for a file
+src/phdr.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/phdr.cpp.s
+.PHONY : src/phdr.cpp.s
+
+src/rle.o: src/rle.cpp.o
+.PHONY : src/rle.o
+
+# target to build an object file
+src/rle.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/rle.cpp.o
+.PHONY : src/rle.cpp.o
+
+src/rle.i: src/rle.cpp.i
+.PHONY : src/rle.i
+
+# target to preprocess a source file
+src/rle.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/rle.cpp.i
+.PHONY : src/rle.cpp.i
+
+src/rle.s: src/rle.cpp.s
+.PHONY : src/rle.s
+
+# target to generate assembly for a file
+src/rle.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/engine.dir/build.make CMakeFiles/engine.dir/src/rle.cpp.s
+.PHONY : src/rle.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -219,6 +267,12 @@ help:
 	@echo "... src/mesh.o"
 	@echo "... src/mesh.i"
 	@echo "... src/mesh.s"
+	@echo "... src/phdr.o"
+	@echo "... src/phdr.i"
+	@echo "... src/phdr.s"
+	@echo "... src/rle.o"
+	@echo "... src/rle.i"
+	@echo "... src/rle.s"
 .PHONY : help
 
 
