@@ -1,0 +1,2 @@
+# Why is x becoming 0?
+Solution: integer division makes aspectRation become 0;

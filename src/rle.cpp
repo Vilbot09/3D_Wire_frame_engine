@@ -9,6 +9,15 @@ SDL_Renderer* renderer;
 
 rle::appState state;
 
+// Frame rate related variables
+Uint64 lastTime = 0;
+Uint64 currentTime = 0.0f;
+double deltaTime = 0.0f;
+double frameRate = 0.0f;
+double frequency = 0.0f;
+
+bool fullscreen = false;
+
 // *******
 // Setting up engine
 // *******
@@ -19,9 +28,14 @@ void rle::Init() {
     window = SDL_CreateWindow("Relay Engine", 1000, 700, SDL_WINDOW_HIGH_PIXEL_DENSITY);
     renderer = SDL_CreateRenderer(window, nullptr);
 
+    SDL_SetWindowResizable(window, true);
+
     // Populate appState
     state.window = window;
     state.renderer = renderer;
+
+    frequency = (double)SDL_GetPerformanceFrequency();
+    lastTime = SDL_GetPerformanceCounter();
 }
 
 void rle::Run() {
@@ -33,6 +47,12 @@ void rle::Run() {
 
     // Main loop
     while (running) {
+        currentTime = SDL_GetPerformanceCounter();
+        deltaTime = (currentTime - lastTime) / frequency;
+        lastTime = currentTime;
+
+        state.deltaTime = (float)deltaTime;
+        state.frameRate = (float)(1.0f / deltaTime);
 
         // Checking for inputs
         while (SDL_PollEvent(&e)) {
@@ -40,10 +60,31 @@ void rle::Run() {
                 running = false; // break out of the main loop
             }
 
+            if (e.type == SDL_EVENT_KEY_DOWN) {
+                if (e.key.key == SDLK_F11) { // Toggling fullscreen
+                    if (fullscreen == false) {
+                        SDL_SetWindowFullscreen(window, true);
+                        fullscreen = true;
+                    }
+                    else {
+                        SDL_SetWindowFullscreen(window, false);
+                        fullscreen = false;
+                    }
+                }
+
+                if (e.key.key == SDLK_ESCAPE) { // Toggling fullscreen
+                    if (fullscreen) {
+                        SDL_SetWindowFullscreen(window, false);
+                        fullscreen = false;
+                    }
+                }
+            }
+
             state.event = e;
             UserInput(state);
         }
 
+        // Clearing screen
         SDL_SetRenderDrawColor(renderer, 0, 0, 0, SDL_ALPHA_OPAQUE);
         SDL_RenderClear(renderer);
 
@@ -151,12 +192,13 @@ rle::matrix4x4 rle::MatrixTranslation(float tX, float tY, float tZ) {
 }
 
 rle::matrix4x4 rle::MatrixProjection(camera3d camera) {
-    float ratio = camera.far / (camera.far - camera.near);
+    float f = 1.0f / SDL_tanf(camera.fov * 0.5f / 180.0f * SDL_PI_F);
+    // std::cout << camera.aspectRatio; 
     matrix4x4 matrix;
-    matrix.m[0][0] = camera.aspectRatio * camera.fovRad;
-    matrix.m[1][1] = camera.fovRad;
-    matrix.m[2][2] = ratio;
-    matrix.m[3][2] = -camera.near * ratio;
+    matrix.m[0][0] = f * camera.aspectRatio;
+    matrix.m[1][1] = f;
+    matrix.m[2][2] = camera.far / (camera.far - camera.near);
+    matrix.m[3][2] = -camera.near * camera.far / (camera.far - camera.near);
     matrix.m[2][3] = 1.0f;
     matrix.m[3][3] = 0.0f;
     return matrix;
@@ -173,34 +215,49 @@ void rle::SetRenderColor(color color) {
     SDL_SetRenderDrawColor(renderer, color.r, color.g, color.b, color.a);
 }
 
-void rle::RenderMesh3D(camera3d camera, mesh3d mesh) {
+void rle::RenderObject3D(camera3d camera, object3d object) {
+    RenderMesh3D(camera, object, object.mesh);
+}
+
+void rle::RenderMesh3D(camera3d camera, object3d object, mesh3d mesh) {
     // This a loop that will loop through all the triangles in mesh.t
     for (auto tri : mesh.t) {  
-        RenderTriangle3D(camera, tri);
+        RenderTriangle3D(camera, object, tri);
     }
 }
 
-void rle::RenderTriangle3D(camera3d camera, triangle3d triangle) {
+void rle::RenderTriangle3D(camera3d camera, object3d object, triangle3d triangle) {
+
+    // Camera movement stuff
+
+    vector3d upVector = { 0.0f, 1.0f, 0.0f };
+    vector3d targetVector = { 0.0f, 0.0f, 1.0f };
+    matrix4x4 camYawMat = MatrixRotationY(camera.yaw);
+    matrix4x4 camPitchMat = MatrixRotationX(camera.pitch);
+
+    vector3d lookDir = MultiplyVectorByMatrix(MultiplyVectorByMatrix(targetVector, camPitchMat), camYawMat);  
+    targetVector = AddVectors(camera.pos, lookDir);
+
     triangle3d newTri = triangle;
 
     // Matrix multiplication goes here
+    
+    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationX(object.rot.x));
+    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationX(object.rot.x));
+    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationX(object.rot.x));
 
-    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationX(0.0f));
-    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationX(0.0f));
-    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationX(0.0f));
+    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationY(object.rot.y));
+    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationY(object.rot.y));
+    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationY(object.rot.y));
 
-    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationY(0.0f));
-    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationY(0.0f));
-    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationY(0.0f));
-
-    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationZ(0.0f));
-    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationZ(0.0f));
-    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationZ(0.0f));
+    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixRotationZ(object.rot.z));
+    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixRotationZ(object.rot.z));
+    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixRotationZ(object.rot.z));
 
     // Translate
-    newTri.p[0].z += 20.0f;
-    newTri.p[1].z += 20.0f;
-    newTri.p[2].z += 20.0f;
+    newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixTranslation(object.pos.x, object.pos.y, object.pos.z));
+    newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixTranslation(object.pos.x, object.pos.y, object.pos.z));
+    newTri.p[2] = MultiplyVectorByMatrix(newTri.p[2], MatrixTranslation(object.pos.x, object.pos.y, object.pos.z));
 
     newTri.p[0] = MultiplyVectorByMatrix(newTri.p[0], MatrixProjection(camera));
     newTri.p[1] = MultiplyVectorByMatrix(newTri.p[1], MatrixProjection(camera));
@@ -246,6 +303,14 @@ rle::vector3d rle::AddFloatToVector(vector3d v, float f) {
     newV.x = v.x + f;
     newV.y = v.y + f;
     newV.z = v.z + f;
+    return newV;
+}
+
+rle::vector3d rle::AddVectors(vector3d v, vector3d f) {
+    vector3d newV = v;
+    newV.x = v.x + f.x;
+    newV.y = v.y + f.y;
+    newV.z = v.z + f.z;
     return newV;
 }
 

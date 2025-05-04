@@ -1,2 +1,2 @@
 all:
-	g++ -I../include -L../lib/linux -o main ../src/*.cpp -lSDL3 -Wno-deprecated
+	g++ -I../include -L../lib -o main ../src/*.cpp -lSDL3 -Wno-deprecated

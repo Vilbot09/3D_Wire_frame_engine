@@ -3,6 +3,7 @@
 #include <SDL3/SDL.h>
 #include <vector> // For triangle3d
 #include <string> 
+#include <iostream> // For debugging purposes
 
 namespace rle {
 
@@ -36,22 +37,33 @@ struct appState { // Will be given to the user in UserCreate and UserUpdate so t
     SDL_Renderer* renderer;
     SDL_Window* window;
     SDL_Event event;
+    float deltaTime;
+    float frameRate;
 };
 
-struct camera3d { // This will handle all the projection "settings", it will also have a position in the world
+struct camera3d { // This will hold all the projection "settings", it will also have a position in the world
+    int width = 1000.0f;
+    int height = 700.0f;
     float fov = 90.0f;
-    float fovRad = 1.0f / SDL_tanf(fov * 0.5f / 180.0f * SDL_PI_F);
     float near = 0.1f;
     float far = 1000.0f;
-    float width = 1000.0f;
-    float height = 700.0f;
-    float aspectRatio = (int)height / (int)width;
+    float aspectRatio = (float)height / (float)width;
+
     vector3d pos;
+    vector3d lookDir;
+    float yaw;
+    float pitch;
+
+    void GetNewWindowSize(SDL_Window* window) {
+        SDL_GetWindowSizeInPixels(window, &width, &height);
+        aspectRatio = (float)height / (float)width;
+    }
 };
 
 struct object3d {
     mesh3d mesh;
     vector3d pos;
+    vector3d rot;
 };
 
 // Matrix functions
@@ -74,9 +86,9 @@ vector3d MultiplyMatricies(matrix4x4, matrix4x4);
 mesh3d LoadMeshFromObjectFile(std::string);
 
 // Functions that the user will define
-void UserStart(appState);
-void UserUpdate(appState);
-void UserInput(appState);
+void UserStart(const appState&);
+void UserUpdate(const appState&);
+void UserInput(const appState&);
 
 // Functions that will initualize and start SDL
 void Init();
@@ -84,8 +96,9 @@ void Run();
 
 // Function for rendering
 void SetRenderColor(color);
-void RenderMesh3D(camera3d, mesh3d);
-void RenderTriangle3D(camera3d, triangle3d);
+void RenderObject3D(camera3d, object3d);
+void RenderMesh3D(camera3d, object3d, mesh3d);
+void RenderTriangle3D(camera3d, object3d, triangle3d);
 void RenderTriangle2D(vector2d, vector2d, vector2d);
 
 }
