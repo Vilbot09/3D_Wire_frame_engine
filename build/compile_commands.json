@@ -1,0 +1,27 @@
+[
+{
+  "directory": "/home/hjalmar/Projects/3D_Wire_frame_engine/build",
+  "command": "/usr/bin/g++  -I/home/hjalmar/Projects/3D_Wire_frame_engine/include -g -std=gnu++17 -o CMakeFiles/engine.dir/src/engine.cpp.o -c /home/hjalmar/Projects/3D_Wire_frame_engine/src/engine.cpp",
+  "file": "/home/hjalmar/Projects/3D_Wire_frame_engine/src/engine.cpp"
+},
+{
+  "directory": "/home/hjalmar/Projects/3D_Wire_frame_engine/build",
+  "command": "/usr/bin/g++  -I/home/hjalmar/Projects/3D_Wire_frame_engine/include -g -std=gnu++17 -o CMakeFiles/engine.dir/src/main.cpp.o -c /home/hjalmar/Projects/3D_Wire_frame_engine/src/main.cpp",
+  "file": "/home/hjalmar/Projects/3D_Wire_frame_engine/src/main.cpp"
+},
+{
+  "directory": "/home/hjalmar/Projects/3D_Wire_frame_engine/build",
+  "command": "/usr/bin/g++  -I/home/hjalmar/Projects/3D_Wire_frame_engine/include -g -std=gnu++17 -o CMakeFiles/engine.dir/src/mesh.cpp.o -c /home/hjalmar/Projects/3D_Wire_frame_engine/src/mesh.cpp",
+  "file": "/home/hjalmar/Projects/3D_Wire_frame_engine/src/mesh.cpp"
+},
+{
+  "directory": "/home/hjalmar/Projects/3D_Wire_frame_engine/build",
+  "command": "/usr/bin/g++  -I/home/hjalmar/Projects/3D_Wire_frame_engine/include -g -std=gnu++17 -o CMakeFiles/engine.dir/src/phdr.cpp.o -c /home/hjalmar/Projects/3D_Wire_frame_engine/src/phdr.cpp",
+  "file": "/home/hjalmar/Projects/3D_Wire_frame_engine/src/phdr.cpp"
+},
+{
+  "directory": "/home/hjalmar/Projects/3D_Wire_frame_engine/build",
+  "command": "/usr/bin/g++  -I/home/hjalmar/Projects/3D_Wire_frame_engine/include -g -std=gnu++17 -o CMakeFiles/engine.dir/src/rle.cpp.o -c /home/hjalmar/Projects/3D_Wire_frame_engine/src/rle.cpp",
+  "file": "/home/hjalmar/Projects/3D_Wire_frame_engine/src/rle.cpp"
+}
+]

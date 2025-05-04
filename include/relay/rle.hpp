@@ -16,6 +16,10 @@ struct vector2d {
     float x, y;
 };
 
+struct color {
+    Uint8 r, g, b, a;  
+};
+
 struct triangle3d {
     vector3d p[3]; // Array of three point
 };
@@ -31,9 +35,10 @@ struct matrix4x4 {
 struct appState { // Will be given to the user in UserCreate and UserUpdate so they can use it
     SDL_Renderer* renderer;
     SDL_Window* window;
+    SDL_Event event;
 };
 
-struct camera3d { // This will handle all the projection "setting", it will also have a position in the world
+struct camera3d { // This will handle all the projection "settings", it will also have a position in the world
     float fov = 90.0f;
     float fovRad = 1.0f / SDL_tanf(fov * 0.5f / 180.0f * SDL_PI_F);
     float near = 0.1f;
@@ -58,15 +63,27 @@ matrix4x4 MatrixProjection(camera3d);
 matrix4x4 MatrixPointAt(vector3d, vector3d, vector3d);
 matrix4x4 MatrixQuickInvert(matrix4x4);
 
+// Maths functions
+vector3d AddVectors(vector3d, vector3d);
+vector3d AddFloatToVector(vector3d, float);
+vector3d MultiplyVectorByMatrix(vector3d, matrix4x4);
+vector3d MultiplyVectorByFloat(vector3d, float);
+vector3d MultiplyMatricies(matrix4x4, matrix4x4);
+
+// Mesh functions
+mesh3d LoadMeshFromObjectFile(std::string);
+
 // Functions that the user will define
 void UserStart(appState);
 void UserUpdate(appState);
+void UserInput(appState);
 
 // Functions that will initualize and start SDL
 void Init();
 void Run();
 
 // Function for rendering
+void SetRenderColor(color);
 void RenderMesh3D(camera3d, mesh3d);
 void RenderTriangle3D(camera3d, triangle3d);
 void RenderTriangle2D(vector2d, vector2d, vector2d);
